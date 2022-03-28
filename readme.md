@@ -10,3 +10,16 @@ This repo contains some useful sub commands for ethereum and TRON
 | `addr`  | Address related commands  |
 |  `vm`   | EVM related commands  |
 | `scan`  | TronScan related commands  |# tools
+
+
+### Installation
+
+```shell
+protoc --go_out=./proto ./proto/*.proto
+go build -o /usr/local/bin/tools
+ln -s /usr/local/bin/tools /bin/tt
+```
+
+#### How to install `protoc` or `go`
+
+Can't you fucking Google it?
