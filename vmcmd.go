@@ -84,7 +84,7 @@ var (
 			if res, err := args.UnpackValues(data); err == nil {
 				fmt.Printf("[unpack result]:\n\n")
 				for i, r := range res {
-					printSol(r, &args[i].Type, "arg", i, 0)
+					printSol(r, &args[i].Type, "arg", i, 1)
 				}
 				return nil
 			} else {
@@ -107,7 +107,7 @@ var (
 )
 
 func printSol(param interface{}, paramTy *abi.Type, name string, index, offset int) {
-	printOffset(offset)
+	printSeparator(offset, "  ", "", "- ")
 	switch paramTy.T {
 	case abi.ArrayTy:
 		fmt.Printf("[%s-%d]: %s\n", name, index, paramTy.String())
@@ -129,8 +129,10 @@ func printSol(param interface{}, paramTy *abi.Type, name string, index, offset i
 	}
 }
 
-func printOffset(offset int) {
-	for i := 0; i < offset; i++ {
-		fmt.Print("  ")
+func printSeparator(repeat int, symbol, prefix, suffix string) {
+	fmt.Print(prefix)
+	for i := 0; i < repeat; i++ {
+		fmt.Print(symbol)
 	}
+	fmt.Print(suffix)
 }

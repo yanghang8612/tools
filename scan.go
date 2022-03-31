@@ -10,7 +10,9 @@ import (
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
 	"io/ioutil"
+	"math/big"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -32,59 +34,62 @@ var (
 				return errors.New("error net argument")
 			}
 			addr := c.Args().Get(1)
-			start := "0"
-			limit := "20"
-			if c.NArg() > 2 {
-				start = c.Args().Get(2)
+			start := 0
+			total := 20
+			if c.NArg() == 3 {
+				total, _ = strconv.Atoi(c.Args().Get(2))
 			}
-			if c.NArg() > 3 {
-				limit = c.Args().Get(3)
+			if c.NArg() == 4 {
+				start, _ = strconv.Atoi(c.Args().Get(2))
+				total, _ = strconv.Atoi(c.Args().Get(3))
 			}
-			data := doGet("https://" + domain +
-				".tronscan.org/api/contracts/transaction?" +
-				"sort=-timestamp&" +
-				"count=true&" +
-				"limit=" + limit +
-				"&start=" + start +
-				"&contract=" + addr)
+			fmt.Println("[Legend]: ✅ - [Success] ⚠️  - [Revert] ⏱  - [Out_Of_Time] ⚡️ - [Out_Of_Energy] 💢 - [Other]")
+			for i := 0; i < total; i += 50 {
+				data := doGet("https://" + domain +
+					".tronscan.org/api/contracts/transaction?" +
+					"sort=-timestamp&" +
+					"count=true&" +
+					"limit=50" +
+					"&start=" + strconv.Itoa(start+i) +
+					"&contract=" + addr)
 
-			if data != nil {
-				var txs Txs
-				err := json.Unmarshal(data, &txs)
-				if err != nil {
-					return err
-				}
-
-				fmt.Printf("[Total]: %5d\n", txs.Total)
-				fmt.Println("[Legend]: ✅ - [Success] ⚠️  - [Revert] ⏱  - [Out_Of_Time] ⚡️ - [Out_Of_Energy] 💢 - [Other]")
-				cache := make(map[string]string)
-				for i, tx := range txs.Data {
-					fmt.Printf("%2d %s %s %s ", i+1, time.Unix(tx.Timestamp/1000, 0).Format("01-02 15:04:05"), tx.TxHash, tx.OwnAddress)
-					switch tx.ContractRet {
-					case "SUCCESS":
-						fmt.Printf("✅ ")
-					case "REVERT":
-						fmt.Printf("⚠️  ")
-					case "OUT_OF_TIME":
-						fmt.Printf("⏱  ")
-					case "OUT_OF_ENERGY":
-						fmt.Printf("⚡️ ")
-					default:
-						fmt.Printf("💢 ")
+				if data != nil {
+					var txs Txs
+					err := json.Unmarshal(data, &txs)
+					if err != nil {
+						return err
 					}
-					if len(tx.CallData) >= 8 {
-						if _, ok := cache[tx.CallData[:8]]; !ok {
-							selector, _ := hex.DecodeString(tx.CallData[:8])
-							method := queryMethod(selector)
-							if len(method) != 0 {
-								cache[tx.CallData[:8]] = method
-							} else {
-								cache[tx.CallData[:8]] = fmt.Sprintf("%x", selector)
-							}
+
+					//fmt.Printf("[Total]: %5d\n", txs.Total)
+					cache := make(map[string]string)
+					for j, tx := range txs.Data {
+						fmt.Printf("%3d %s %s %s ", i+j+1, time.Unix(tx.Timestamp/1000, 0).Format("01-02 15:04:05"), tx.TxHash, tx.OwnAddress)
+						switch tx.ContractRet {
+						case "SUCCESS":
+							fmt.Printf("✅ ")
+						case "REVERT":
+							fmt.Printf("⚠️  ")
+						case "OUT_OF_TIME":
+							fmt.Printf("⏱  ")
+						case "OUT_OF_ENERGY":
+							fmt.Printf("⚡️ ")
+						default:
+							fmt.Printf("💢 ")
 						}
-						fmt.Print(cache[tx.CallData[:8]])
+						if len(tx.CallData) >= 8 {
+							if _, ok := cache[tx.CallData[:8]]; !ok {
+								selector, _ := hex.DecodeString(tx.CallData[:8])
+								method := queryMethod(selector)
+								if len(method) != 0 {
+									cache[tx.CallData[:8]] = method
+								} else {
+									cache[tx.CallData[:8]] = fmt.Sprintf("%x", selector)
+								}
+							}
+							fmt.Print(cache[tx.CallData[:8]])
+						}
+						fmt.Println()
 					}
-					fmt.Println()
 				}
 			}
 			return nil
@@ -125,9 +130,12 @@ var (
 					if len(data) == 0 {
 						fmt.Println("[No return data]")
 					} else {
-						fmt.Println("[Result]:" + string(data))
-						fmt.Println("In HEX:\t" + hexutils.BytesToHex(data))
-						fmt.Println("In ASCII:\t" + string(data))
+						fmt.Println("[Return data]:")
+						fmt.Println("  - In HEX: " + hexutils.BytesToHex(data))
+						if len(data) == 32 {
+							fmt.Println("  - In INT: " + big.NewInt(0).SetBytes(data).String())
+						}
+						fmt.Println("  - In ASCII: " + string(data))
 					}
 				}
 			}
@@ -141,8 +149,8 @@ var (
 			}
 
 			// print some details in ScanTxInfo
-			fmt.Println("[From]: ", scanTxInfo.ContractData.OwnerAddress)
-			fmt.Println("[To]: ", scanTxInfo.ContractData.ContractAddress)
+			fmt.Println("[From]:", scanTxInfo.ContractData.OwnerAddress)
+			fmt.Println("[To]:", scanTxInfo.ContractData.ContractAddress)
 
 			var method string
 			callData := hexutils.HexToBytes(scanTxInfo.ContractData.Data)
@@ -175,7 +183,7 @@ var (
 				}
 				if res, err := args.UnpackValues(callData[4:]); err == nil {
 					for i, r := range res {
-						printSol(r, &args[i].Type, "Arg", i, 0)
+						printSol(r, &args[i].Type, "Arg", i, 1)
 					}
 				}
 			} else {
