@@ -63,7 +63,11 @@ var (
 					//fmt.Printf("[Total]: %5d\n", txs.Total)
 					cache := make(map[string]string)
 					for j, tx := range txs.Data {
-						fmt.Printf("%3d %s %s %s ", i+j+1, time.Unix(tx.Timestamp/1000, 0).Format("01-02 15:04:05"), tx.TxHash, tx.OwnAddress)
+						fmt.Printf("%"+strconv.Itoa(len(strconv.Itoa(total)))+"d %s %s %s ",
+							i+j+1,
+							time.Unix(tx.Timestamp/1000, 0).Format("2006-01-02 15:04:05"),
+							tx.TxHash,
+							tx.OwnAddress)
 						switch tx.ContractRet {
 						case "SUCCESS":
 							fmt.Printf("✅ ")
