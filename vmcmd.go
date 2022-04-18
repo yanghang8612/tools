@@ -82,7 +82,7 @@ var (
 				args = append(args, abi.Argument{Type: solType})
 			}
 			if res, err := args.UnpackValues(data); err == nil {
-				fmt.Printf("[unpack result]:\n\n")
+				fmt.Printf("[unpack result]:\n")
 				for i, r := range res {
 					printSol(r, &args[i].Type, "arg", i, 1)
 				}
