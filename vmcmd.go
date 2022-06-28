@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"reflect"
 	"strings"
@@ -110,21 +112,33 @@ func printSol(param interface{}, paramTy *abi.Type, name string, index, offset i
 	printSeparator(offset, "  ", "", "- ")
 	switch paramTy.T {
 	case abi.ArrayTy:
-		fmt.Printf("[%s-%d]: %s\n", name, index, paramTy.String())
+		fmt.Printf("[%s-%02d]: %s\n", name, index, paramTy.String())
 		paramArray := reflect.ValueOf(param)
 		for i := 0; i < paramArray.Len(); i++ {
 			printSol(paramArray.Index(i).Interface(), paramTy.Elem, "array", i, offset+1)
 		}
 	case abi.SliceTy:
-		fmt.Printf("[%s-%d]: %s\n", name, index, paramTy.String())
+		fmt.Printf("[%s-%02d]: %s\n", name, index, paramTy.String())
 		paramSlice := reflect.ValueOf(param)
 		for i := 0; i < paramSlice.Len(); i++ {
 			printSol(paramSlice.Index(i).Interface(), paramTy.Elem, "slice", i, offset+1)
 		}
 	case abi.BytesTy, abi.FixedBytesTy:
-		fmt.Printf("[%s-%d]: %s, %#x\n", name, index, paramTy.String(), param)
+		fmt.Printf("[%s-%02d]: %s, %#x\n", name, index, paramTy.String(), param)
+	case abi.AddressTy:
+		fmt.Printf("[%s-%02d]: %s, %v - %s\n", name, index, paramTy.String(), param, base58.CheckEncode(param.(common.Address).Bytes(), 0x41))
+	case abi.IntTy, abi.UintTy:
+		fmt.Printf("[%s-%02d]: %s, %v", name, index, paramTy.String(), param)
+		intWithDot := formatBigInt(param.(*big.Int))
+		if strings.ContainsAny(intWithDot, ",") {
+			fmt.Printf(" - %s", intWithDot)
+		}
+		if len(param.(*big.Int).String()) >= 6 {
+			fmt.Printf(" (%d)", len(param.(*big.Int).String()))
+		}
+		fmt.Println()
 	default:
-		fmt.Printf("[%s-%d]: %s, %v\n", name, index, paramTy.String(), param)
+		fmt.Printf("[%s-%02d]: %s, %v\n", name, index, paramTy.String(), param)
 		//fmt.Printf("[Parameter-%d]: %T, %#x\n", index, param, param)
 	}
 }
@@ -135,4 +149,30 @@ func printSeparator(repeat int, symbol, prefix, suffix string) {
 		fmt.Print(symbol)
 	}
 	fmt.Print(suffix)
+}
+
+func formatBigInt(n *big.Int) string {
+	var (
+		text  = n.String()
+		buf   = make([]byte, len(text)+len(text)/3)
+		comma = 0
+		i     = len(buf) - 1
+	)
+	for j := len(text) - 1; j >= 0; j, i = j-1, i-1 {
+		c := text[j]
+
+		switch {
+		case c == '-':
+			buf[i] = c
+		case comma == 3:
+			buf[i] = ','
+			i--
+			comma = 0
+			fallthrough
+		default:
+			buf[i] = c
+			comma++
+		}
+	}
+	return string(buf[i+1:])
 }

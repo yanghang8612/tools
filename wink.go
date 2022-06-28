@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"github.com/status-im/keycard-go/hexutils"
+	"math/big"
 	"os"
 	"strings"
 )
@@ -17,7 +18,7 @@ const (
 	URL = "https://api.trongrid.io/wallet/triggerconstantcontract"
 )
 
-func test1() {
+func wink01() {
 	var winkList []Wink
 	input := bufio.NewScanner(os.Stdin)
 	for input.Scan() {
@@ -52,7 +53,7 @@ func test1() {
 	//queryWINK(accList)
 }
 
-func testSubmit(w *Wink) {
+func wink02(w *Wink) {
 	//w.Aggregator = toTronAddr(query(w.Proxy, "aggregator()", ""))
 	currentRound := toUint64(query(w.Proxy, "latestRound()", ""))
 
@@ -142,8 +143,13 @@ func abiDecode(typeStr, dataStr string) interface{} {
 	return resultList[0]
 }
 
-func toTronAddr(hexData string) string {
-	return base58.CheckEncode(common.HexToAddress(hexData).Bytes(), 0x41)
+func toTronAddr(ethAddressHex string) string {
+	return base58.CheckEncode(common.HexToAddress(ethAddressHex).Bytes(), 0x41)
+}
+
+func toEthAddr(tronAddress string) string {
+	ethAddr, _, _ := base58.CheckDecode(tronAddress)
+	return hexutils.BytesToHex(common.BytesToAddress(ethAddr).Hash().Bytes())
 }
 
 func toUint64(hexData string) uint64 {
@@ -152,6 +158,10 @@ func toUint64(hexData string) uint64 {
 
 func toUint256(hexData string) *uint256.Int {
 	return uint256.NewInt(0).SetBytes(hexutils.HexToBytes(hexData))
+}
+
+func toBigInt(hexData string) *big.Int {
+	return big.NewInt(0).SetBytes(hexutils.HexToBytes(hexData))
 }
 
 type Query struct {

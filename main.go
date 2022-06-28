@@ -52,6 +52,15 @@ func main() {
 			Subcommands: []*cli.Command{
 				&txsCommand,
 				&txCommand,
+				&speedCommand,
+				&transferCommand,
+			},
+		},
+		{
+			Name:  "eth",
+			Usage: "ETH JSON-RPC related commands",
+			Subcommands: []*cli.Command{
+				&logsCommand,
 			},
 		},
 	}
