@@ -61,7 +61,7 @@ var (
 					}
 
 					//fmt.Printf("[Total]: %5d\n", txs.Total)
-					total = txs.Total
+					//total = txs.Total
 					cache := make(map[string]string)
 					for j, tx := range txs.Data {
 						fmt.Printf("%"+strconv.Itoa(len(strconv.Itoa(total)))+"d %s %s %s ",

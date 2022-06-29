@@ -26,9 +26,10 @@ var (
 				return errors.New("pad subcommand needs num arg")
 			}
 			num, _ := new(big.Int).SetString(c.Args().Get(0), 10)
+			fmt.Printf("[origin hex] 0x%x\n", num.Bytes())
 			res := make([]byte, 32-len(num.Bytes()))
 			res = append(res, num.Bytes()...)
-			fmt.Printf("%x\n", res)
+			fmt.Printf("[padded hex] 0x%x\n", res)
 			return nil
 		},
 	}
@@ -102,7 +103,11 @@ var (
 				return errors.New("4bytes subcommand needs func or event signature arg")
 			}
 			signature := c.Args().Get(0)
-			fmt.Printf("%x\n", crypto.Keccak256([]byte(signature))[:4])
+			selector := crypto.Keccak256([]byte(signature))[:4]
+			fmt.Printf("[origin hex] 0x%x\n", selector)
+			res := make([]byte, 32-len(selector))
+			selector = append(selector, res...)
+			fmt.Printf("[padded hex] 0x%x\n", selector)
 			return nil
 		},
 	}

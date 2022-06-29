@@ -77,5 +77,8 @@ func (bar *Bar) Add(i int) {
 	bar.mu.Lock()
 	defer bar.mu.Unlock()
 	bar.current += i
+	if bar.current > bar.total {
+		bar.current = bar.total
+	}
 	bar.load()
 }

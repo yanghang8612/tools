@@ -14,7 +14,7 @@ import (
 var (
 	logsCommand = cli.Command{
 		Name:  "logs",
-		Usage: "Query eth logs with given address, from block and topics",
+		Usage: "Query eth logs with given address, from block and topics, `page` logs at a query",
 		Action: func(c *cli.Context) error {
 			if c.NArg() != 4 {
 				return errors.New("logs subcommand needs address, from block, topics and page args")
@@ -27,6 +27,7 @@ var (
 			if latestBlockNumber != -1 {
 				logs := make([]Log, 0)
 				bar := NewBar(0, latestBlockNumber-fromBlock)
+				bar.load()
 				for i := fromBlock; i < latestBlockNumber; i += page + 1 {
 					var params []GetLogsParam
 					params = append(params, GetLogsParam{
