@@ -9,12 +9,12 @@ import (
 
 type Bar struct {
 	mu      sync.Mutex
-	graph   string    // 显示符号
-	rate    string    // 进度条
-	percent int       // 百分比
-	current int       // 当前进度位置
-	total   int       // 总进度
-	start   time.Time // 开始时间
+	graph   string
+	rate    string
+	percent int
+	current int
+	total   int
+	start   time.Time
 }
 
 func NewBar(current, total int) *Bar {
@@ -27,7 +27,7 @@ func NewBar(current, total int) *Bar {
 	}
 	bar.percent = bar.getPercent()
 	for i := 0; i < bar.percent; i += 1 {
-		bar.rate += bar.graph //初始化进度条位置
+		bar.rate += bar.graph
 	}
 	return bar
 }
