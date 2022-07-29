@@ -68,7 +68,7 @@ var (
 							i+j+1,
 							time.Unix(tx.Timestamp/1000, 0).Format("2006-01-02 15:04:05"),
 							tx.TxHash,
-							tx.OwnAddress)
+							tx.OwnerAddress)
 						switch tx.ContractRet {
 						case "SUCCESS":
 							fmt.Printf("✅ ")
@@ -384,12 +384,15 @@ type Txs struct {
 }
 
 type Tx struct {
-	OwnAddress  string
-	ToAddress   string
-	CallData    string `json:"call_data"`
-	TxHash      string
-	Timestamp   int64
-	ContractRet string
+	OwnerAddress string
+	ToAddress    string
+	CallData     string `json:"call_data"`
+	TxHash       string
+	Timestamp    int64
+	ContractRet  string
+	TriggerInfo  struct {
+		MethodName string
+	} `json:"trigger_info"`
 }
 
 type Rsp4Bytes struct {
