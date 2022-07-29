@@ -4,8 +4,44 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/urfave/cli/v2"
+)
+
+var (
+	nowCommand = cli.Command{
+		Name:  "now",
+		Usage: "CaoJiaJin like command",
+		Action: func(c *cli.Context) error {
+			if c.NArg() == 0 {
+				fmt.Println(time.Now().Unix())
+				fmt.Println(time.Now().UnixMilli())
+				fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
+			} else {
+				arg := c.Args().Get(0)
+				ts, err := strconv.Atoi(arg)
+				if err == nil {
+					fmt.Println(time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
+				} else {
+					loc, _ := time.LoadLocation("Asia/Shanghai")
+					var dt time.Time
+					var err error
+					dt, err = time.ParseInLocation("2006-01-02 15:04:05", arg, loc)
+					if err != nil {
+						dt, err = time.ParseInLocation("2006-01-02", arg, loc)
+					}
+					if err != nil {
+						fmt.Println("Date format err.")
+					} else {
+						fmt.Println(dt.Unix())
+					}
+				}
+			}
+			return nil
+		},
+	}
 )
 
 func main() {
@@ -63,6 +99,7 @@ func main() {
 				&logsCommand,
 			},
 		},
+		&nowCommand,
 	}
 
 	for _, cmd := range app.Commands {
