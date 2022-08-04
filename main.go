@@ -106,6 +106,16 @@ func main() {
 			},
 		},
 		{
+			Name:  "hex",
+			Usage: "Hex related commands",
+			Subcommands: []*cli.Command{
+				&addrCommand,
+				&intCommand,
+				&maxCommand,
+				&strCommand,
+			},
+		},
+		{
 			Name:  "vm",
 			Usage: "EVM related commands",
 			Subcommands: []*cli.Command{

@@ -11,8 +11,8 @@ This repo contains some useful sub commands for ethereum and TRON
 |  `vm`   | EVM related commands                        |
 | `scan`  | TronScan related commands                   |
 |  `eth`  | ETH JSON-RPC related commands               |
+|  `hex`  | Hex conversion command                      |
 |  `now`  | Convert time between datetime and timestamp |
-|  `hex`  | Convert num between decimal and hexadecimal |
 
 ## Installation
 
