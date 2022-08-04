@@ -1,19 +1,23 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
+	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
 )
 
 var (
 	nowCommand = cli.Command{
 		Name:  "now",
-		Usage: "CaoJiaJin like command",
+		Usage: "Convert time between datetime and timestamp",
 		Action: func(c *cli.Context) error {
 			if c.NArg() == 0 {
 				fmt.Println(time.Now().Unix())
@@ -37,6 +41,35 @@ var (
 					} else {
 						fmt.Println(dt.Unix())
 					}
+				}
+			}
+			return nil
+		},
+	}
+
+	hexCommand = cli.Command{
+		Name:  "hex",
+		Usage: "Convert num between decimal and hexadecimal",
+		Action: func(c *cli.Context) error {
+			if c.NArg() != 1 {
+				return errors.New("hex command needs one arg")
+			}
+			arg := c.Args().Get(0)
+			// input is num in hex
+			if containHexPrefix(arg) {
+				argBytes := hexutils.HexToBytes(dropHexPrefix(arg))
+				fmt.Printf("[in decimal] - %d\n", new(big.Int).SetBytes(argBytes))
+				// special case, first byte is `backspace`
+				if len(argBytes) > 0 && argBytes[0] == 0x08 {
+					argBytes = argBytes[1:]
+				}
+				fmt.Printf("[in ascii]   - %s\n", string(bytes.ToValidUTF8(argBytes, nil)))
+			} else {
+				// otherwise input must be in dec
+				if num, ok := new(big.Int).SetString(arg, 10); ok {
+					fmt.Printf("[in hex] - 0x%x\n", num.Bytes())
+				} else {
+					return errors.New("input type is in dec, but cannot covert it")
 				}
 			}
 			return nil
@@ -100,6 +133,7 @@ func main() {
 			},
 		},
 		&nowCommand,
+		&hexCommand,
 	}
 
 	for _, cmd := range app.Commands {

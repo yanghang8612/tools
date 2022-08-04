@@ -20,18 +20,18 @@ import (
 var (
 	vmPadCommand = cli.Command{
 		Name:  "pad",
-		Usage: "Pad num or bytes to 32bytes",
+		Usage: "Pad num(in hex or dec) to 32bytes",
 		Action: func(c *cli.Context) error {
 			if c.NArg() != 1 {
-				return errors.New("pad subcommand needs num or bytes arg")
+				return errors.New("pad subcommand needs num arg")
 			}
 			arg := c.Args().Get(0)
-			// input is bytes
+			// input is in hex
 			if containHexPrefix(arg) {
 				arg = dropHexPrefix(arg)
 				argBytes := hexutils.HexToBytes(arg)
 				if len(argBytes) > 32 {
-					return errors.New("input type is likely bytes, but its length is greater than 32, there is no need to pack it")
+					return errors.New("input is in hex, but its length in bytes is greater than 32, there is no need to pad it")
 				}
 				lackBytes := make([]byte, 32-len(argBytes))
 				bigEndianRes := append(lackBytes, argBytes...)
@@ -39,14 +39,14 @@ var (
 				littleEndianRes := append(argBytes, lackBytes...)
 				fmt.Printf("[padded hex in little endian] 0x%x\n", littleEndianRes)
 			} else {
-				// otherwise input must be num
-				if num, ok := new(big.Int).SetString(c.Args().Get(0), 10); ok {
+				// otherwise input must be in dec
+				if num, ok := new(big.Int).SetString(arg, 10); ok {
 					fmt.Printf("[origin hex] 0x%x\n", num.Bytes())
 					res := make([]byte, 32-len(num.Bytes()))
 					res = append(res, num.Bytes()...)
 					fmt.Printf("[padded hex] 0x%x\n", res)
 				} else {
-					return errors.New("input type is likely num, but cannot covert it")
+					return errors.New("input is in dec, but cannot covert it")
 				}
 			}
 			return nil

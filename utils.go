@@ -1,6 +1,8 @@
 package main
 
-import "strings"
+import (
+	"strings"
+)
 
 func containHexPrefix(str string) bool {
 	return strings.HasPrefix(str, "0x") || strings.HasPrefix(str, "0X")
