@@ -4,14 +4,15 @@ This repo contains some useful sub commands for ethereum and TRON
 
 ## Sub commands
 
-| Command | Description                    |
-|:-------:|--------------------------------|
-|  `db`   | Database related commands      |
-| `addr`  | Address related commands       |
-|  `vm`   | EVM related commands           |
-| `scan`  | TronScan related commands      |
-|  `eth`  | ETH JSON-RPC related commands  |
-|  `now`  | CaoJiaJin like command         |
+| Command | Description                                 |
+|:-------:|---------------------------------------------|
+|  `db`   | Database related commands                   |
+| `addr`  | Address related commands                    |
+|  `vm`   | EVM related commands                        |
+| `scan`  | TronScan related commands                   |
+|  `eth`  | ETH JSON-RPC related commands               |
+|  `now`  | Convert time between datetime and timestamp |
+|  `hex`  | Convert num between decimal and hexadecimal |
 
 ## Installation
 
@@ -48,7 +49,7 @@ OPTIONS:
    --help, -h  show help (default: false)
 ```
 
-### addr subcommands
+### `addr` subcommands
 
 ```shell
 $ tt addr
@@ -85,7 +86,7 @@ $ tt addr encode 0x78880fbe59623b0961a9999faa48dc000b8f97df
 TLxX5oCK76yMHJ2r9TSrQHK44j1bUCxkP5
 ```
 
-### vm subcommands
+### `vm` subcommands
 
 ```shell
 $ tt vm
@@ -96,7 +97,7 @@ USAGE:
    tt vm command [command options] [arguments...]
 
 COMMANDS:
-   pad     Pad num or bytes to 32bytes
+   pad     Pad num(in hex or dec) to 32bytes
    split   Spilt data to each 32bytes
    unpack  Unpack data with given types
    4bytes  Get 4bytes selector for given func or event
@@ -159,7 +160,7 @@ $ tt vm 4bytes 'regUser(address,string)'
 [padded hex] 0x5a7c789500000000000000000000000000000000000000000000000000000000
 ```
 
-### scan subcommands
+### `scan` subcommands
 
 ```shell
 $ tt scan
@@ -218,7 +219,7 @@ low return
 
 ```
 
-### eth subcommands
+### `eth` subcommands
 
 ```shell
 $ tt eth
@@ -244,7 +245,7 @@ $ tt eth logs 0x0a3f6849f78076aefaDf113F5BED87720274dDC0 14000000 0x3c278bd50000
 {"address":"0x0a3f6849f78076aefadf113f5bed87720274ddc0","topics":["0x3c278bd500000000000000000000000000000000000000000000000000000000","0x0000000000000000000000005cab1e5286529370880776461c53a0e47d74fb63","0x000000000000000000000000e246c4ba65d95c2f902e39fbeb0047a67ab4f25a","0x0000000000000000000000000000000000000000000000000000000000000000"],"data":"0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000243c278bd5000000000000000000000000e246c4ba65d95c2f902e39fbeb0047a67ab4f25a00000000000000000000000000000000000000000000000000000000","blockNumber":"0xd6800c","transactionHash":"0x6718672e2e53b2581d94ed0e0e9580347298f9c3745220c4dca74028e309350c","transactionIndex":"0x15c","blockHash":"0x0c8c355eb711811c9f9db809a6ec3a2934a6d1bb283b268efd0b0da7b6ef5f18","logIndex":"0x244","removed":false}
 ```
 
-### now command
+### `now` command
 
 #### examples
 
@@ -259,4 +260,16 @@ $ tt now 2022-07-29
 1659024000
 $ tt now '2022-07-29 14:44:49'
 1659077089
+```
+
+### `hex` command
+
+#### examples
+
+```shell
+$ tt hex 0x0200007368616269
+[in decimal] - 144115683748307561
+[in ascii]   - shabi
+$ tt hex 1000000000000000000
+[in hex] - 0x0de0b6b3a7640000
 ```
