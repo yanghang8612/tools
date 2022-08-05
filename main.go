@@ -1,17 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
+	"tools/log"
 	"tools/util"
 
-	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,14 +19,15 @@ var (
 		Usage: "Convert time between datetime and timestamp",
 		Action: func(c *cli.Context) error {
 			if c.NArg() == 0 {
-				fmt.Println(time.Now().Unix())
-				fmt.Println(time.Now().UnixMilli())
-				fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
+				log.NewLog("in sec", time.Now().Unix())
+				log.NewLog("in milli", time.Now().UnixMilli())
+				log.NewLog("in datetime", time.Now().Format("2006-01-02 15:04:05"))
 			} else {
 				arg := c.Args().Get(0)
 				ts, err := strconv.Atoi(arg)
 				if err == nil {
-					fmt.Println(time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
+					log.NewLog("if sec", time.Unix(int64(ts/1000), 0).Format("2006-01-02 15:04:05"))
+					log.NewLog("if milli", time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
 				} else {
 					loc, _ := time.LoadLocation("Asia/Shanghai")
 					var dt time.Time
@@ -38,39 +37,11 @@ var (
 						dt, err = time.ParseInLocation("2006-01-02", arg, loc)
 					}
 					if err != nil {
-						fmt.Println("Date format err.")
+						return err
 					} else {
-						fmt.Println(dt.Unix())
+						log.NewLog("in sec", dt.Unix())
+						log.NewLog("in milli", dt.UnixMilli())
 					}
-				}
-			}
-			return nil
-		},
-	}
-
-	hexCommand = cli.Command{
-		Name:  "hex",
-		Usage: "Convert num between decimal and hexadecimal",
-		Action: func(c *cli.Context) error {
-			if c.NArg() != 1 {
-				return errors.New("hex command needs one arg")
-			}
-			arg := c.Args().Get(0)
-			// input is num in hex
-			if utils.ContainHexPrefix(arg) {
-				argBytes := hexutils.HexToBytes(utils.DropHexPrefix(arg))
-				fmt.Printf("[in decimal] - %d\n", new(big.Int).SetBytes(argBytes))
-				// special case, first byte is `backspace`
-				if len(argBytes) > 0 && argBytes[0] == 0x08 {
-					argBytes = argBytes[1:]
-				}
-				fmt.Printf("[in ascii]   - %s\n", string(bytes.ToValidUTF8(argBytes, nil)))
-			} else {
-				// otherwise input must be in dec
-				if num, ok := new(big.Int).SetString(arg, 10); ok {
-					fmt.Printf("[in hex] - 0x%x\n", num.Bytes())
-				} else {
-					return errors.New("input type is in dec, but cannot covert it")
 				}
 			}
 			return nil
@@ -82,9 +53,56 @@ func main() {
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.HideHelp = true
-	app.Copyright = "Copyright 2021-2021 Asuka"
+	app.Copyright = "Copyright 2021-2022 Asuka"
 	app.Usage = "very useful tool kits for Asuka"
 	app.CustomAppHelpTemplate = ""
+	app.Action = func(c *cli.Context) error {
+		if c.NArg() != 1 {
+			return cli.ShowAppHelp(c)
+		}
+		arg := c.Args().Get(0)
+		// arg is in hex
+		if utils.ContainHexPrefix(arg) {
+			data := utils.HexToBytes(arg)
+			// 20 bytes, it should be eth addr
+			if len(data) == 20 {
+				return addrEncodeCommand.Action(c)
+			}
+			// 0 ~ 32 bytes, pad it to 32 bytes
+			if len(data) < 32 {
+				_ = vmPadCommand.Action(c)
+			} else {
+				// > 32 bytes, can be call data
+				_ = vmSplitCommand.Action(c)
+			}
+			// output its value in decimal and try to display its readable string
+			_ = hexStrCommand.Action(c)
+		} else {
+			// arg is not hex
+			// check if arg is TRON addr
+			if strings.HasPrefix(arg, "T") && len(arg) == 34 {
+				return addrDecodeCommand.Action(c)
+			}
+			// check if arg is num in decimal
+			num, err := strconv.Atoi(arg)
+			if err == nil {
+				if num >= 8 && num <= 256 && num%8 == 0 {
+					_ = hexMaxCommand.Action(c)
+				}
+				// arg is decimal num
+				_ = nowCommand.Action(c)
+				// pad it to 32bytes
+				_ = vmPadCommand.Action(c)
+				// convert it to addr
+				_ = addrNumCommand.Action(c)
+			} else {
+				// it may be a string
+				// calculate 4bytes
+				_ = vm4bytesCommand.Action(c)
+			}
+		}
+		return nil
+	}
 	app.Commands = []*cli.Command{
 		{
 			Name:  "db",
@@ -110,10 +128,10 @@ func main() {
 			Name:  "hex",
 			Usage: "Hex related commands",
 			Subcommands: []*cli.Command{
-				&addrCommand,
-				&intCommand,
-				&maxCommand,
-				&strCommand,
+				&hexAddrCommand,
+				&hexIntCommand,
+				&hexMaxCommand,
+				&hexStrCommand,
 			},
 		},
 		{
@@ -144,7 +162,10 @@ func main() {
 			},
 		},
 		&nowCommand,
-		&hexCommand,
+	}
+	app.After = func(c *cli.Context) error {
+		log.FlushLogsToConsole()
+		return nil
 	}
 
 	for _, cmd := range app.Commands {

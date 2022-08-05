@@ -1,13 +1,15 @@
 package main
 
 import (
+	utils "tools/util"
+
 	"errors"
-	"fmt"
+	"tools/log"
+
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
-	utils "tools/util"
 )
 
 var (
@@ -19,8 +21,8 @@ var (
 				return errors.New("num subcommand needs num arg")
 			}
 			addr := common.HexToAddress(c.Args().Get(0))
-			//tronZeroAddr := append([]byte{0x41}, zeroAddr...)
-			fmt.Printf("%s\n%s\n", addr.String(), base58.CheckEncode(addr.Bytes(), 0x41))
+			log.NewLog("eth addr", addr.String())
+			log.NewLog("tron addr", base58.CheckEncode(addr.Bytes(), 0x41))
 			return nil
 		},
 	}
@@ -40,7 +42,7 @@ var (
 			}
 			addr, _, err := base58.CheckDecode(base58Addr)
 			if err == nil {
-				fmt.Printf("%s\n", common.BytesToAddress(addr).String())
+				log.NewLog("eth addr", common.BytesToAddress(addr).String())
 				return nil
 			} else {
 				return err
@@ -59,7 +61,7 @@ var (
 				return errors.New("eth address length must be 20")
 			}
 			ethAddr := hexutils.HexToBytes(addr)
-			fmt.Printf("%s\n", base58.CheckEncode(ethAddr, 0x41))
+			log.NewLog("tron addr", base58.CheckEncode(ethAddr, 0x41))
 			return nil
 		},
 	}

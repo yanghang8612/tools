@@ -1,15 +1,17 @@
 package main
 
 import (
+	utils "tools/util"
+
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/urfave/cli/v2"
 	"math/big"
 	"strconv"
 	"strings"
-	utils "tools/util"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/urfave/cli/v2"
 )
 
 var (

@@ -1,20 +1,24 @@
 package main
 
 import (
+	utils "tools/util"
+
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"reflect"
+	"regexp"
+	"strings"
+	"tools/log"
+
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
-	"math/big"
-	"reflect"
-	"strings"
-	utils "tools/util"
 )
 
 var (
@@ -35,16 +39,16 @@ var (
 				}
 				lackBytes := make([]byte, 32-len(argBytes))
 				bigEndianRes := append(lackBytes, argBytes...)
-				fmt.Printf("[padded hex in big endian] 0x%x\n", bigEndianRes)
+				log.NewLog("32bytes in BE", bigEndianRes)
 				littleEndianRes := append(argBytes, lackBytes...)
-				fmt.Printf("[padded hex in little endian] 0x%x\n", littleEndianRes)
+				log.NewLog("32bytes in LE", littleEndianRes)
 			} else {
 				// otherwise input must be in dec
 				if num, ok := new(big.Int).SetString(arg, 10); ok {
-					fmt.Printf("[origin hex] 0x%x\n", num.Bytes())
+					log.NewLog("origin hex", num.Bytes())
 					res := make([]byte, 32-len(num.Bytes()))
 					res = append(res, num.Bytes()...)
-					fmt.Printf("[padded hex] 0x%x\n", res)
+					log.NewLog("padded hex", res)
 				} else {
 					return errors.New("input is in dec, but cannot covert it")
 				}
@@ -63,14 +67,16 @@ var (
 			if len(data)%32 == 4 {
 				rspData := doGet(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/"+
 					"?hex_signature=%x", data[:4]))
-				var rsp Rsp4Bytes
-				err := json.Unmarshal(rspData, &rsp)
-				if err != nil {
-					return err
-				}
-
-				if rsp.Count != 0 {
-					fmt.Printf("[selector]: %x - %s\n", data[:4], rsp.Results[rsp.Count-1].Signature)
+				if rspData != nil {
+					var rsp Rsp4Bytes
+					err := json.Unmarshal(rspData, &rsp)
+					if err == nil {
+						if rsp.Count != 0 {
+							fmt.Printf("[selector]: %x - %s\n", data[:4], rsp.Results[rsp.Count-1].Signature)
+						}
+					} else {
+						fmt.Printf("[selector]: %x\n", data[:4])
+					}
 				} else {
 					fmt.Printf("[selector]: %x\n", data[:4])
 				}
@@ -122,11 +128,20 @@ var (
 				return errors.New("4bytes subcommand needs func or event signature arg")
 			}
 			signature := c.Args().Get(0)
+			// drop name for all params
+			nameRegExp := regexp.MustCompile(`\s\w+([,)])`)
+			signature = nameRegExp.ReplaceAllString(signature, "$1")
+			// expand all int|uint to int256|uint256
+			abbIntRegExp := regexp.MustCompile(`int([,)\s\[])`)
+			signature = abbIntRegExp.ReplaceAllString(signature, "int256$1")
+			// drop all whitespaces
+			signature = strings.ReplaceAll(signature, " ", "")
+			log.NewLog("abi valid", signature)
 			selector := crypto.Keccak256([]byte(signature))[:4]
-			fmt.Printf("[origin hex] 0x%x\n", selector)
+			log.NewLog("origin hex", selector)
 			res := make([]byte, 32-len(selector))
 			selector = append(selector, res...)
-			fmt.Printf("[padded hex] 0x%x\n", selector)
+			log.NewLog("padded hex", selector)
 			return nil
 		},
 	}

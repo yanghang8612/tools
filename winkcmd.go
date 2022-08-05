@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"os"
+	"strings"
+
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"github.com/status-im/keycard-go/hexutils"
-	"math/big"
-	"os"
-	"strings"
 )
 
 const (

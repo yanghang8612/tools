@@ -2,6 +2,8 @@ package utils
 
 import (
 	"strings"
+
+	"github.com/status-im/keycard-go/hexutils"
 )
 
 func ContainHexPrefix(str string) bool {
@@ -15,4 +17,15 @@ func DropHexPrefix(str string) string {
 		str = str[1:]
 	}
 	return str
+}
+
+func HexToBytes(str string) []byte {
+	if ContainHexPrefix(str) {
+		return hexutils.HexToBytes(DropHexPrefix(str))
+	}
+	return hexutils.HexToBytes(str)
+}
+
+func DropParamName(signature string) string {
+	return ""
 }

@@ -6,15 +6,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/status-im/keycard-go/hexutils"
-	"github.com/urfave/cli/v2"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/status-im/keycard-go/hexutils"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -104,7 +105,7 @@ var (
 		Name:  "tx",
 		Usage: "Query the tx in the given net for the given tx hash",
 		Action: func(c *cli.Context) error {
-			if c.NArg() < 2 {
+			if c.NArg() < 1 {
 				return errors.New("tx subcommand needs net and hash args")
 			}
 			var gridDomain, scanDomain string
