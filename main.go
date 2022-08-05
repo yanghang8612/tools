@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	"tools/util"
 
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
@@ -56,8 +57,8 @@ var (
 			}
 			arg := c.Args().Get(0)
 			// input is num in hex
-			if containHexPrefix(arg) {
-				argBytes := hexutils.HexToBytes(dropHexPrefix(arg))
+			if utils.ContainHexPrefix(arg) {
+				argBytes := hexutils.HexToBytes(utils.DropHexPrefix(arg))
 				fmt.Printf("[in decimal] - %d\n", new(big.Int).SetBytes(argBytes))
 				// special case, first byte is `backspace`
 				if len(argBytes) > 0 && argBytes[0] == 0x08 {

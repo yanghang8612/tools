@@ -11,12 +11,13 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	"tools/util"
 )
 
 var (
 	addrCommand = cli.Command{
 		Name:  "addr",
-		Usage: "convert hex between hex, tron-addr, eth-addr",
+		Usage: "convert hex between hex, TRON-addr and eth-addr",
 		Action: func(c *cli.Context) error {
 			if c.NArg() != 1 {
 				return errors.New("1 input only")
@@ -34,7 +35,7 @@ var (
 				if len(input) == 42 && strings.HasPrefix(input, "41") {
 					input = input[2:]
 				}
-				input := dropHexPrefix(input)
+				input := utils.DropHexPrefix(input)
 				addr.SetBytes(hexutils.HexToBytes(input))
 			}
 
@@ -56,7 +57,7 @@ var (
 			if c.Args().Len() > 1 {
 				base, _ = strconv.Atoi(c.Args().Get(1))
 			}
-			input = dropHexPrefix(input)
+			input = utils.DropHexPrefix(input)
 			value := new(big.Int)
 			value.SetString(input, base)
 			bigValue, _ := uint256.FromBig(value)

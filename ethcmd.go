@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	utils "tools/util"
 )
 
 var (
@@ -26,8 +27,8 @@ var (
 			latestBlockNumber := int(getLatestBlockNumber())
 			if latestBlockNumber != -1 {
 				logs := make([]Log, 0)
-				bar := NewBar(0, latestBlockNumber-fromBlock)
-				bar.load()
+				bar := utils.NewBar(0, latestBlockNumber-fromBlock)
+				bar.Load()
 				for i := fromBlock; i < latestBlockNumber; i += page + 1 {
 					var params []GetLogsParam
 					params = append(params, GetLogsParam{

@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -56,7 +56,7 @@ func (bar *Bar) getTime() (s string) {
 	return
 }
 
-func (bar *Bar) load() {
+func (bar *Bar) Load() {
 	last := bar.percent
 	bar.percent = bar.getPercent()
 	for i := 0; i < bar.percent-last; i++ {
@@ -69,7 +69,7 @@ func (bar *Bar) Reset(current int) {
 	bar.mu.Lock()
 	defer bar.mu.Unlock()
 	bar.current = current
-	bar.load()
+	bar.Load()
 
 }
 
@@ -80,5 +80,5 @@ func (bar *Bar) Add(i int) {
 	if bar.current > bar.total {
 		bar.current = bar.total
 	}
-	bar.load()
+	bar.Load()
 }

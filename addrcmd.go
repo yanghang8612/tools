@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
+	utils "tools/util"
 )
 
 var (
@@ -54,7 +54,7 @@ var (
 			if c.NArg() != 1 {
 				return errors.New("decode subcommand needs eth address arg")
 			}
-			addr := dropHexPrefix(c.Args().Get(0))
+			addr := utils.DropHexPrefix(c.Args().Get(0))
 			if len(addr) != 40 {
 				return errors.New("eth address length must be 20")
 			}

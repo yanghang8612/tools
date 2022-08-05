@@ -6,15 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/ethereum/go-ethereum/common"
-	"math/big"
-	"reflect"
-	"strings"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/status-im/keycard-go/hexutils"
 	"github.com/urfave/cli/v2"
+	"math/big"
+	"reflect"
+	"strings"
+	utils "tools/util"
 )
 
 var (
@@ -27,8 +27,8 @@ var (
 			}
 			arg := c.Args().Get(0)
 			// input is in hex
-			if containHexPrefix(arg) {
-				arg = dropHexPrefix(arg)
+			if utils.ContainHexPrefix(arg) {
+				arg = utils.DropHexPrefix(arg)
 				argBytes := hexutils.HexToBytes(arg)
 				if len(argBytes) > 32 {
 					return errors.New("input is in hex, but its length in bytes is greater than 32, there is no need to pad it")
@@ -59,7 +59,7 @@ var (
 			if c.NArg() != 1 {
 				return errors.New("split subcommand needs data arg")
 			}
-			data := hexutils.HexToBytes(dropHexPrefix(c.Args().Get(0)))
+			data := hexutils.HexToBytes(utils.DropHexPrefix(c.Args().Get(0)))
 			if len(data)%32 == 4 {
 				rspData := doGet(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/"+
 					"?hex_signature=%x", data[:4]))
@@ -97,7 +97,7 @@ var (
 			if c.NArg() != 2 {
 				return errors.New("unpack subcommand needs data and type args")
 			}
-			data, _ := hex.DecodeString(dropHexPrefix(c.Args().Get(1)))
+			data, _ := hex.DecodeString(utils.DropHexPrefix(c.Args().Get(1)))
 			args := abi.Arguments{}
 			for _, arg := range strings.Split(c.Args().Get(0), ",") {
 				solType, _ := abi.NewType(arg, "", nil)
