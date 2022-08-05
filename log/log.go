@@ -23,20 +23,15 @@ func FlushLogsToConsole() {
 	titleFormat := "%" + strconv.Itoa(maxTitleLength) + "s - "
 	for _, log := range pendingLogs {
 		title := "[" + log.title + "]"
-		bytesContent, ok := log.content.([]byte)
-		if ok {
-			fmt.Printf(titleFormat+"0x%x\n", title, bytesContent)
-			continue
-		}
-		stringContent, ok := log.content.(string)
-		if ok {
-			fmt.Printf(titleFormat+"%s\n", title, stringContent)
-			continue
-		}
-		bigIntContent, ok := log.content.(*big.Int)
-		if ok {
-			fmt.Printf(titleFormat+"%d\n", title, bigIntContent)
-			continue
+		switch log.content.(type) {
+		case []byte:
+			fmt.Printf(titleFormat+"0x%x\n", title, log.content)
+		case string:
+			fmt.Printf(titleFormat+"%s\n", title, log.content)
+		case int, uint, int64, uint64, *big.Int, big.Int:
+			fmt.Printf(titleFormat+"%d\n", title, log.content)
+		default:
+			fmt.Printf(titleFormat+"%v\n", title, log.content)
 		}
 	}
 }
