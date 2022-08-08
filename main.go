@@ -18,29 +18,35 @@ var (
 		Name:  "now",
 		Usage: "Convert time between datetime and timestamp",
 		Action: func(c *cli.Context) error {
+			// display now
 			if c.NArg() == 0 {
 				log.NewLog("in sec", time.Now().Unix())
 				log.NewLog("in milli", time.Now().UnixMilli())
-				log.NewLog("in datetime", time.Now().Format("2006-01-02 15:04:05"))
+				log.NewLog("in datetime", time.Now())
 			} else {
 				arg := c.Args().Get(0)
 				ts, err := strconv.Atoi(arg)
+				// input str is timestamp
 				if err == nil {
-					log.NewLog("if sec", time.Unix(int64(ts/1000), 0).Format("2006-01-02 15:04:05"))
-					log.NewLog("if milli", time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
+					log.NewLog("if sec", time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
+					log.NewLog("if milli", time.Unix(int64(ts/1000), 0).Format("2006-01-02 15:04:05"))
 				} else {
+					// input str is date or time
 					loc, _ := time.LoadLocation("Asia/Shanghai")
-					var dt time.Time
-					var err error
-					dt, err = time.ParseInLocation("2006-01-02 15:04:05", arg, loc)
-					if err != nil {
-						dt, err = time.ParseInLocation("2006-01-02", arg, loc)
-					}
-					if err != nil {
-						return err
-					} else {
-						log.NewLog("in sec", dt.Unix())
-						log.NewLog("in milli", dt.UnixMilli())
+					formats := []string{"2006-01-02 15:04:05", "2006-01-02 15:04", "2006-01-02 15", "2006-01-02",
+						"01-02 15:04:05", "01-02 15:04", "01-02", "15:04:05", "15:04"}
+					for _, format := range formats {
+						if dt, err := time.ParseInLocation(format, arg, loc); err == nil {
+							if !strings.ContainsAny(format, "-") {
+								dt = dt.AddDate(time.Now().Year(), int(time.Now().Month())-1, time.Now().Day())
+							}
+							if dt.Year() == 0 {
+								dt = dt.AddDate(time.Now().Year(), 0, 0)
+							}
+							log.NewLog("in sec", dt.Unix())
+							log.NewLog("in milli", dt.UnixMilli())
+							log.NewLog("in datetime", dt)
+						}
 					}
 				}
 			}
@@ -53,8 +59,8 @@ func main() {
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.HideHelp = true
-	app.Copyright = "Copyright 2021-2022 Asuka"
-	app.Usage = "very useful tool kits for Asuka"
+	app.Copyright = "Copyright 2021-2022 Asuka, jeancky"
+	app.Usage = "very useful tool kits for TRON and ethereum"
 	app.CustomAppHelpTemplate = ""
 	app.Action = func(c *cli.Context) error {
 		if c.NArg() != 1 {
@@ -97,8 +103,16 @@ func main() {
 				_ = addrNumCommand.Action(c)
 			} else {
 				// it may be a string
-				// calculate 4bytes
-				_ = vm4bytesCommand.Action(c)
+				// check if arg is date
+				if strings.ContainsAny(arg, "-") || strings.ContainsAny(arg, ":") {
+					return nowCommand.Action(c)
+				}
+				// check if arg is function or event
+				if strings.ContainsAny(arg, "(") {
+					return vm4bytesCommand.Action(c)
+				}
+				// otherwise, convert str to hex
+				return hexStrCommand.Action(c)
 			}
 		}
 		return nil
