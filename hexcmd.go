@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"math/big"
 	"strconv"
@@ -107,7 +106,7 @@ var (
 				if len(argBytes) > 0 && argBytes[0] == 0x08 {
 					argBytes = argBytes[1:]
 				}
-				log.NewLog("in ascii", string(bytes.ToValidUTF8(argBytes, nil)))
+				log.NewLog("in ascii", utils.ToReadableASCII(argBytes))
 			} else {
 				// otherwise input is str
 				log.NewLog("in hex", []byte(arg))

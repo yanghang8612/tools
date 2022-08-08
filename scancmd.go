@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	utils "tools/util"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/status-im/keycard-go/hexutils"
@@ -141,7 +142,7 @@ var (
 						if len(data) == 32 {
 							fmt.Println("  - In INT: " + big.NewInt(0).SetBytes(data).String())
 						}
-						fmt.Println("  - In ASCII: " + string(data))
+						fmt.Println("  - In ASCII: " + utils.ToReadableASCII(data))
 					}
 				}
 			}

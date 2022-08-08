@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"strings"
 
 	"github.com/status-im/keycard-go/hexutils"
@@ -24,6 +25,10 @@ func HexToBytes(str string) []byte {
 		return hexutils.HexToBytes(DropHexPrefix(str))
 	}
 	return hexutils.HexToBytes(str)
+}
+
+func ToReadableASCII(s []byte) string {
+	return strings.ReplaceAll(string(bytes.ToValidUTF8(s, nil)), "\n", "↵")
 }
 
 func DropParamName(signature string) string {
