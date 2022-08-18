@@ -43,7 +43,6 @@ var (
 			return nil
 		},
 	}
-
 	hexIntCommand = cli.Command{
 		Name:  "int",
 		Usage: "Convert num between dec and hex",
@@ -64,7 +63,6 @@ var (
 			return nil
 		},
 	}
-
 	hexMaxCommand = cli.Command{
 		Name:  "max",
 		Usage: "Get max value for the type like uint-x",
@@ -87,7 +85,6 @@ var (
 			return nil
 		},
 	}
-
 	hexStrCommand = cli.Command{
 		Name:  "str",
 		Usage: "convert hex between str",
