@@ -2,7 +2,7 @@ package main
 
 import (
     "tools/net"
-    utils "tools/util"
+    "tools/util"
 
     "encoding/hex"
     "encoding/json"

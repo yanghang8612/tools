@@ -1,11 +1,9 @@
 package main
 
 import (
-    "github.com/ethereum/go-ethereum/common/math"
-    "sort"
-    "strconv"
+    "tools/log"
     "tools/net"
-    utils "tools/util"
+    "tools/util"
 
     "encoding/json"
     "errors"
@@ -13,20 +11,22 @@ import (
     "math/big"
     "reflect"
     "regexp"
+    "sort"
+    "strconv"
     "strings"
-    "tools/log"
 
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/accounts/abi"
     "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/math"
     "github.com/ethereum/go-ethereum/crypto"
     "github.com/status-im/keycard-go/hexutils"
     "github.com/urfave/cli/v2"
 )
 
 type Contract struct {
-    ContractAddress string `json:"contract_address"`
-    ABI             struct {
+    Address string `json:"contract_address"`
+    ABI     struct {
         Entries []map[string]interface{} `json:"entrys"`
     } `json:"abi"`
 }
@@ -34,19 +34,30 @@ type Contract struct {
 var (
     callCommand = cli.Command{
         Name:  "call",
-        Usage: "Interact with contract on TRON network",
+        Usage: "Interact with contract on TRON network (main or nile)",
         Action: func(c *cli.Context) error {
-            if c.NArg() == 0 {
-                return errors.New("call command needs contract address")
+            if c.NArg() < 2 {
+                return errors.New("call command needs at least net and contract address")
             }
-            contractAddr := c.Args().Get(0)
-            abiAddr := c.Args().Get(0)
-            if c.NArg() > 1 {
-                abiAddr = c.Args().Get(1)
+            domain := c.Args().Get(0)
+            if strings.Compare("main", domain) == 0 {
+                domain = "api"
+            } else if strings.Compare("nile", domain) == 0 {
+                domain = "nile"
+            } else {
+                return errors.New("wrong net arg (main or nile)")
             }
-            resData := net.Get(fmt.Sprintf("https://api.trongrid.io/wallet/getcontract?value=%s&visible=true", abiAddr))
+            contractAddr := c.Args().Get(1)
+            abiAddr := c.Args().Get(1)
+            if c.NArg() > 2 {
+                abiAddr = c.Args().Get(2)
+            }
+            resData := net.Get(fmt.Sprintf("https://%s.trongrid.io/wallet/getcontract?value=%s&visible=true", domain, abiAddr))
             var contract Contract
             if err := json.Unmarshal(resData, &contract); err == nil {
+                if len(contract.Address) == 0 {
+                    return errors.New("contract not exist, you may input wrong net")
+                }
                 for _, abi := range contract.ABI.Entries {
                     if _, ok := abi["stateMutability"]; ok {
                         abi["stateMutability"] = strings.ToLower(abi["stateMutability"].(string))
@@ -56,7 +67,6 @@ var (
                     }
                 }
                 data, _ := json.Marshal(contract.ABI.Entries)
-                //reg := regexp.MustCompile("(\"[A-Z][a-z]+\")")
                 contractABI, _ := abi.JSON(strings.NewReader(string(data)))
 
                 // first sort key
@@ -78,7 +88,11 @@ var (
                     fmt.Print("Which method you want to call: ")
                     var index string
                     fmt.Scanln(&index)
-                    i, _ := strconv.Atoi(index)
+                    i, err := strconv.Atoi(index)
+                    if i <= 0 || i >= len(methods) || err != nil {
+                        fmt.Println("Input index error, try again.")
+                        continue
+                    }
                     method := methods[i-1]
                     fmt.Printf("You choose method: [%s]\n", strings.ReplaceAll(method.String(), "function ", ""))
                     args := make([]interface{}, 0)
@@ -107,11 +121,11 @@ var (
                         if _, ok := utils.ToAddress(from); !ok {
                             from = "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb"
                         }
-                        res := net.Trigger(contractAddr, from, method.Sig, hexutils.BytesToHex(calldata))
+                        res := net.Trigger(domain, contractAddr, from, method.Sig, hexutils.BytesToHex(calldata))
                         // print energy used
                         fmt.Println("[Energy Used]\n  - " + strconv.Itoa(int(res.EnergyUsed)))
                         // print constant result
-                        if len(res.ConstantResult[0]) > 0 {
+                        if len(res.ConstantResult) > 0 && len(res.ConstantResult[0]) > 0 {
                             fmt.Println("[Return Data]")
                             results := make(map[string]interface{})
                             err = method.Outputs.UnpackIntoMap(results, common.FromHex(res.ConstantResult[0]))

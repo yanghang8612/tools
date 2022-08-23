@@ -4,14 +4,15 @@ import (
     "bytes"
     "encoding/json"
     "fmt"
-    "github.com/btcsuite/btcutil/base58"
-    "github.com/ethereum/go-ethereum/common"
     "io"
     "net/http"
+
+    "github.com/btcsuite/btcutil/base58"
+    "github.com/ethereum/go-ethereum/common"
 )
 
 const (
-    Endpoint    = "https://api.trongrid.io/"
+    Endpoint    = "https://%s.trongrid.io/"
     TriggerPath = "wallet/triggerconstantcontract"
 )
 
@@ -64,7 +65,7 @@ type TriggerResponse struct {
     InternalTxs    []*InternalTx `json:"internal_transactions"`
 }
 
-func Trigger(addr, from, selector, params string) *TriggerResponse {
+func Trigger(net, addr, from, selector, params string) *TriggerResponse {
     reqData, _ := json.Marshal(&TriggerRequest{
         OwnerAddress:     from,
         ContractAddress:  addr,
@@ -72,7 +73,7 @@ func Trigger(addr, from, selector, params string) *TriggerResponse {
         Parameter:        params,
         Visible:          true,
     })
-    resData := Post(Endpoint+TriggerPath, reqData)
+    resData := Post(fmt.Sprintf(Endpoint, net)+TriggerPath, reqData)
     var triggerResponse TriggerResponse
     if err := json.Unmarshal(resData, &triggerResponse); err == nil {
         return &triggerResponse

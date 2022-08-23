@@ -1,6 +1,9 @@
 package main
 
 import (
+    "tools/log"
+    "tools/util"
+
     "fmt"
     "go/token"
     "go/types"
@@ -10,8 +13,6 @@ import (
     "regexp"
     "strconv"
     "strings"
-    "tools/log"
-    "tools/util"
 
     "github.com/urfave/cli/v2"
 )

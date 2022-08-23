@@ -1,7 +1,6 @@
 package main
 
 import (
-    "github.com/ethereum/go-ethereum/common/math"
     "tools/log"
     "tools/util"
 
@@ -12,6 +11,7 @@ import (
 
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/common/math"
     "github.com/urfave/cli/v2"
 )
 
