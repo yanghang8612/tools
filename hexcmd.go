@@ -1,6 +1,7 @@
 package main
 
 import (
+    "github.com/ethereum/go-ethereum/common/math"
     "tools/log"
     "tools/util"
 
@@ -11,8 +12,6 @@ import (
 
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"
-    "github.com/holiman/uint256"
-    "github.com/status-im/keycard-go/hexutils"
     "github.com/urfave/cli/v2"
 )
 
@@ -22,22 +21,29 @@ var (
         Usage: "Convert addr between hex, TRON-addr and eth-addr",
         Action: func(c *cli.Context) error {
             if c.NArg() != 1 {
-                return errors.New("addr needs single arg")
+                return errors.New("addr subcommand only needs one arg")
             }
-            input := c.Args().Get(0)
+            arg0 := c.Args().Get(0)
             addr := new(common.Address)
-
-            if input[0] == 'T' {
-                bytes, _, err := base58.CheckDecode(input)
+            if len(arg0) == 34 && arg0[0] == 'T' {
+                // TRON address in Base58
+                addrBytes, _, err := base58.CheckDecode(arg0)
                 if err != nil {
                     return err
                 }
-                addr.SetBytes(bytes)
-            } else {
-                if len(input) == 42 && strings.HasPrefix(input, "41") {
-                    input = input[2:]
+                addr.SetBytes(addrBytes)
+            } else if len(arg0) == 42 && strings.HasPrefix(arg0, "41") {
+                // TRON address in hexadecimal with 0x41 prefix
+                if addrBytes, ok := utils.FromHex(arg0[2:]); ok {
+                    addr.SetBytes(addrBytes)
+                } else {
+                    return errors.New("input is begin with 0x41, but can`t convert to hex")
                 }
-                addr.SetBytes(utils.HexToBytes(input))
+            } else if bigint, ok := math.ParseBig256(arg0); ok {
+                // input is in dec or hex
+                addr.SetBytes(bigint.Bytes())
+            } else {
+                return errors.New("input is not recognized, please append 0x prefix if in hex")
             }
             log.NewLog("eth addr", addr.String())
             log.NewLog("tron addr", base58.CheckEncode(addr.Bytes(), 0x41))
@@ -48,20 +54,17 @@ var (
         Name:  "int",
         Usage: "Convert num between dec and hex",
         Action: func(c *cli.Context) error {
-            if c.NArg() < 1 {
-                return errors.New("int subcommand needs at least num arg")
+            if c.NArg() != 1 {
+                return errors.New("int subcommand only needs num arg")
             }
-            input := c.Args().Get(0)
-            var base = 16
-            if c.Args().Len() > 1 {
-                base, _ = strconv.Atoi(c.Args().Get(1))
+            arg0 := c.Args().Get(0)
+            if bigint, ok := math.ParseBig256(arg0); ok {
+                log.NewLog("in hex", bigint.Bytes())
+                log.NewLog("in dec", bigint)
+                return nil
+            } else {
+                return errors.New("only accept input in dec or hex")
             }
-            value := new(big.Int)
-            value.SetString(utils.DropHexPrefix(input), base)
-            bigValue, _ := uint256.FromBig(value)
-            log.NewLog("in hex", bigValue.Hex())
-            log.NewLog("in dec", bigValue.ToBig())
-            return nil
         },
     }
     hexMaxCommand = cli.Command{
@@ -69,20 +72,21 @@ var (
         Usage: "Get max value for the type like uint-x",
         Action: func(c *cli.Context) error {
             if c.NArg() != 1 {
-                return errors.New("max subcommand needs size arg")
+                return errors.New("max subcommand only needs size arg")
             }
-            size, _ := strconv.Atoi(c.Args().Get(0))
-            if size < 8 || size > 256 {
-                return errors.New("input uint size should be in [8~256]")
+            arg0 := c.Args().Get(0)
+            size, err := strconv.Atoi(arg0)
+            if err != nil {
+                return err
             }
-            if size%8 != 0 {
-                return errors.New("input uint size should be mod by 8")
+            if size <= 0 {
+                return errors.New("input uint size should be greater than 0")
             }
-            bigValue, _ := uint256.FromHex("0x100")
-            one, _ := uint256.FromHex("0x1")
-            bigValue.Lsh(bigValue, uint(size-8)).Sub(bigValue, one)
-            log.NewLog("max hex", bigValue.Hex())
-            log.NewLog("max dec", bigValue.ToBig())
+            maxValue := new(big.Int)
+            maxValue.Lsh(big.NewInt(1), uint(size))
+            maxValue.Sub(maxValue, big.NewInt(1))
+            log.NewLog("max hex", maxValue.Bytes())
+            log.NewLog("max dec", maxValue)
             return nil
         },
     }
@@ -91,12 +95,11 @@ var (
         Usage: "convert hex between str",
         Action: func(c *cli.Context) error {
             if c.NArg() != 1 {
-                return errors.New("hex command needs one arg")
+                return errors.New("hex command only needs single arg")
             }
-            arg := c.Args().Get(0)
-            // input is num in hex
-            if utils.ContainHexPrefix(arg) {
-                argBytes := hexutils.HexToBytes(utils.DropHexPrefix(arg))
+            arg0 := c.Args().Get(0)
+            // check if input is in hex
+            if argBytes, ok := utils.FromHex(arg0); ok {
                 if len(argBytes) <= 32 {
                     log.NewLog("in decimal", new(big.Int).SetBytes(argBytes))
                 }
@@ -106,8 +109,8 @@ var (
                 }
                 log.NewLog("in ascii", utils.ToReadableASCII(argBytes))
             } else {
-                // otherwise input is str
-                log.NewLog("in hex", []byte(arg))
+                // otherwise treat input as str
+                log.NewLog("in hex", []byte(arg0))
             }
             return nil
         },

@@ -1,8 +1,6 @@
 package main
 
 import (
-    tron "tools/proto"
-
     "bytes"
     "encoding/binary"
     "encoding/hex"
@@ -15,7 +13,6 @@ import (
 
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"
-    "github.com/golang/protobuf/proto"
     "github.com/syndtr/goleveldb/leveldb"
     "github.com/syndtr/goleveldb/leveldb/opt"
     "github.com/urfave/cli/v2"
@@ -102,11 +99,6 @@ var (
                 switch outputType {
                 case "num", "number", "int", "int32", "int64":
                     fmt.Printf("Key `%s` int value is %d\n", key, int64(binary.BigEndian.Uint64(value)))
-                case "account", "acc":
-                    account := &tron.Account{}
-                    if proto.UnmarshalMerge(value, account) == nil {
-                        fmt.Printf("%s", proto.MarshalTextString(account))
-                    }
                 case "hex":
                 default:
                     fmt.Printf("Key `%s` hex value is %s\n", key, hex.EncodeToString(value))

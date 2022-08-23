@@ -1,6 +1,7 @@
 package main
 
 import (
+    "tools/net"
     utils "tools/util"
 
     "encoding/json"
@@ -75,7 +76,7 @@ func sendJsonRPCRequest(method string, params interface{}) []byte {
         Params: params,
         Id:     1}
     if reqData, err := json.Marshal(&req); err == nil {
-        return doPost("http://47.90.254.215:8545/", reqData)
+        return net.Post("http://47.90.254.215:8545/", reqData)
     }
     return nil
 }

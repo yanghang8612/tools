@@ -2,64 +2,18 @@ package main
 
 import (
     "fmt"
+    "go/token"
+    "go/types"
+    "math/big"
     "os"
     "path/filepath"
+    "regexp"
     "strconv"
     "strings"
-    "time"
     "tools/log"
     "tools/util"
 
     "github.com/urfave/cli/v2"
-)
-
-var (
-    nowCommand = cli.Command{
-        Name:  "now",
-        Usage: "Convert time between datetime and timestamp",
-        Action: func(c *cli.Context) error {
-            // display now
-            if c.NArg() == 0 {
-                log.NewLog("in sec", time.Now().Unix())
-                log.NewLog("in milli", time.Now().UnixMilli())
-                log.NewLog("in datetime", time.Now())
-            } else {
-                arg := c.Args().Get(0)
-                ts, err := strconv.Atoi(arg)
-                // input str is timestamp
-                if err == nil {
-                    log.NewLog("if sec", time.Unix(int64(ts), 0).Format("2006-01-02 15:04:05"))
-                    log.NewLog("if milli", time.Unix(int64(ts/1000), 0).Format("2006-01-02 15:04:05"))
-                } else {
-                    // input str is date or time
-                    loc, _ := time.LoadLocation("Asia/Shanghai")
-                    formatsWithDateButNoYear := []string{"1-2 15:4:5", "1-2 15:4", "1-2 15", "1-2"}
-                    formatsWithoutDate := []string{"15:4:5", "15:4"}
-                    formats := formatsWithDateButNoYear
-                    // append two kinds of year to formats
-                    for _, f := range formatsWithDateButNoYear {
-                        formats = append(formats, "2006-"+f)
-                        formats = append(formats, "06-"+f)
-                    }
-                    formats = append(formats, formatsWithoutDate...)
-                    for _, format := range formats {
-                        if dt, err := time.ParseInLocation(format, arg, loc); err == nil {
-                            if !strings.ContainsAny(format, "-") {
-                                dt = dt.AddDate(time.Now().Year(), int(time.Now().Month())-1, time.Now().Day()-1)
-                            }
-                            if dt.Year() == 0 {
-                                dt = dt.AddDate(time.Now().Year(), 0, 0)
-                            }
-                            log.NewLog("in sec", dt.Unix())
-                            log.NewLog("in milli", dt.UnixMilli())
-                            log.NewLog("in datetime", dt)
-                        }
-                    }
-                }
-            }
-            return nil
-        },
-    }
 )
 
 func main() {
@@ -73,50 +27,55 @@ func main() {
         if c.NArg() != 1 {
             return cli.ShowAppHelp(c)
         }
-        arg := c.Args().Get(0)
-        // arg is in hex
-        if utils.ContainHexPrefix(arg) {
-            data := utils.HexToBytes(arg)
-            // 20 bytes, it should be eth addr
-            if len(data) == 20 {
-                return addrEncodeCommand.Action(c)
-            }
-            // 0 ~ 32 bytes, pad it to 32 bytes
+        arg0 := c.Args().Get(0)
+        // input can be address
+        _ = hexAddrCommand.Action(c)
+        // input is in hex
+        if data, ok := utils.FromHex(arg0); ok {
+            // 0 ~ 31 bytes, pad it to 32 bytes
             if len(data) < 32 {
-                _ = vmPadCommand.Action(c)
-            } else {
+                _ = abiPadCommand.Action(c)
+            } else if len(data) > 32 {
                 // > 32 bytes, can be call data
-                _ = vmSplitCommand.Action(c)
+                _ = abiSplitCommand.Action(c)
             }
             // output its value in decimal and try to display its readable string
             _ = hexStrCommand.Action(c)
         } else {
-            // arg is not hex
-            // check if arg is TRON addr
-            if strings.HasPrefix(arg, "T") && len(arg) == 34 {
-                return addrDecodeCommand.Action(c)
-            }
-            // check if arg is num in decimal
-            num, err := strconv.Atoi(arg)
+            // input is not hex
+            // check if input is in decimal
+            num, err := strconv.Atoi(arg0)
             if err == nil {
-                if num >= 8 && num <= 256 && num%8 == 0 {
+                if num <= 256 {
                     _ = hexMaxCommand.Action(c)
                 }
                 // arg is decimal num
                 _ = nowCommand.Action(c)
                 // pad it to 32bytes
-                _ = vmPadCommand.Action(c)
-                // convert it to addr
-                _ = addrNumCommand.Action(c)
+                _ = abiPadCommand.Action(c)
             } else {
                 // it may be a string
                 // check if arg is date
-                if strings.ContainsAny(arg, "-") || strings.ContainsAny(arg, ":") {
-                    return nowCommand.Action(c)
+                if strings.ContainsAny(arg0, "-,:") {
+                    _ = nowCommand.Action(c)
                 }
                 // check if arg is function or event
-                if strings.ContainsAny(arg, "(") {
-                    return vm4bytesCommand.Action(c)
+                if matched, _ := regexp.MatchString(`^\w.*\(.*\)$`, arg0); matched {
+                    _ = abi4bytesCommand.Action(c)
+                    return nil
+                }
+                // try to eval arg
+                ee := regexp.MustCompile(`1e\d+`)
+                for _, e := range ee.FindAllString(arg0, -1) {
+                    bigfloat := new(big.Float)
+                    bigfloat.SetString(e)
+                    bigint := new(big.Int)
+                    bigfloat.Int(bigint)
+                    arg0 = strings.ReplaceAll(arg0, e, bigint.String())
+                }
+                if res, err := types.Eval(token.NewFileSet(), nil, token.NoPos, arg0); err == nil {
+                    log.NewLog("eval result", res.Value.String())
+                    return nil
                 }
                 // otherwise, convert str to hex
                 return hexStrCommand.Action(c)
@@ -125,6 +84,18 @@ func main() {
         return nil
     }
     app.Commands = []*cli.Command{
+        &callCommand,
+        &nowCommand,
+        {
+            Name:  "abi",
+            Usage: "ABI related commands",
+            Subcommands: []*cli.Command{
+                &abiPadCommand,
+                &abiSplitCommand,
+                &abiUnpackCommand,
+                &abi4bytesCommand,
+            },
+        },
         {
             Name:  "db",
             Usage: "Database related commands",
@@ -137,12 +108,10 @@ func main() {
             },
         },
         {
-            Name:  "addr",
-            Usage: "Address related commands",
+            Name:  "eth",
+            Usage: "ETH JSON-RPC related commands",
             Subcommands: []*cli.Command{
-                &addrNumCommand,
-                &addrDecodeCommand,
-                &addrEncodeCommand,
+                &logsCommand,
             },
         },
         {
@@ -156,33 +125,13 @@ func main() {
             },
         },
         {
-            Name:  "vm",
-            Usage: "EVM related commands",
-            Subcommands: []*cli.Command{
-                &vmPadCommand,
-                &vmSplitCommand,
-                &vmUnpackCommand,
-                &vm4bytesCommand,
-            },
-        },
-        {
             Name:  "scan",
             Usage: "TronScan related commands",
             Subcommands: []*cli.Command{
                 &txsCommand,
                 &txCommand,
-                &speedCommand,
-                &transferCommand,
             },
         },
-        {
-            Name:  "eth",
-            Usage: "ETH JSON-RPC related commands",
-            Subcommands: []*cli.Command{
-                &logsCommand,
-            },
-        },
-        &nowCommand,
     }
     app.After = func(c *cli.Context) error {
         log.FlushLogsToConsole()

@@ -5,13 +5,10 @@ go 1.19
 require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/ethereum/go-ethereum v1.10.21
-	github.com/golang/protobuf v1.5.2
-	github.com/holiman/uint256 v1.2.0
 	github.com/status-im/keycard-go v0.0.0-20211109104530-b0e0482ba91d
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/urfave/cli/v2 v2.10.2
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
-	google.golang.org/protobuf v1.27.1
 )
 
 require (
