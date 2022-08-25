@@ -5,6 +5,7 @@ import (
     "tools/util"
 
     "errors"
+    "fmt"
     "math/big"
     "strconv"
     "strings"
@@ -58,9 +59,16 @@ var (
                 return errors.New("int subcommand only needs num arg")
             }
             arg0 := c.Args().Get(0)
-            if bigint, ok := math.ParseBig256(arg0); ok {
+            var bigint *big.Int
+            var ok bool
+            if len(arg0) >= 2 && (arg0[:2] == "0x" || arg0[:2] == "0X") {
+                bigint, ok = new(big.Int).SetString(arg0[2:], 16)
+            } else {
+                bigint, ok = new(big.Int).SetString(arg0, 10)
+            }
+            if ok {
                 log.NewLog("in hex", bigint.Bytes())
-                log.NewLog("in dec", bigint)
+                log.NewLog("in dec", fmt.Sprintf("%s (%d)", formatBigInt(bigint), len(bigint.String())))
                 return nil
             } else {
                 return errors.New("only accept input in dec or hex")
