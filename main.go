@@ -11,7 +11,6 @@ import (
     "os"
     "path/filepath"
     "regexp"
-    "strconv"
     "strings"
 
     "github.com/urfave/cli/v2"
@@ -45,14 +44,15 @@ func main() {
         } else {
             // input is not hex
             // check if input is in decimal
-            num, err := strconv.Atoi(arg0)
-            if err == nil {
-                if num <= 256 {
+
+            if num, ok := new(big.Int).SetString(arg0, 10); ok {
+                if num.Cmp(big.NewInt(256)) <= 0 {
                     _ = hexMaxCommand.Action(c)
                 }
                 // arg is decimal num
                 _ = nowCommand.Action(c)
-                // pad it to 32bytes
+                _ = hexIntCommand.Action(c)
+                // try to pad it to 32bytes
                 _ = abiPadCommand.Action(c)
             } else {
                 // it may be a string
