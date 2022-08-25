@@ -173,12 +173,18 @@ var (
             arg := c.Args().Get(0)
             // input is in hex
             if argBytes, ok := utils.FromHex(arg); ok {
+                if len(argBytes) >= 32 {
+                    return errors.New("input should be less than 32bytes")
+                }
                 words := len(argBytes)/32 + 1
                 log.NewLog("32bytes in BE", common.LeftPadBytes(argBytes, words*32))
                 log.NewLog("32bytes in LE", common.RightPadBytes(argBytes, words*32))
             } else {
                 // otherwise input must be in dec
                 if num, ok := utils.FromDec(arg); ok {
+                    if num.BitLen() >= 256 {
+                        return errors.New("input should be less than 32bytes")
+                    }
                     log.NewLog("origin hex", num.Bytes())
                     log.NewLog("padded hex", common.LeftPadBytes(num.Bytes(), 32))
                 } else {
