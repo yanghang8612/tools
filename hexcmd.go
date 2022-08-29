@@ -100,7 +100,7 @@ var (
     }
     hexStrCommand = cli.Command{
         Name:  "str",
-        Usage: "convert hex between str",
+        Usage: "convert str between ascii and hex",
         Action: func(c *cli.Context) error {
             if c.NArg() != 1 {
                 return errors.New("hex command only needs single arg")
@@ -108,9 +108,6 @@ var (
             arg0 := c.Args().Get(0)
             // check if input is in hex
             if argBytes, ok := utils.FromHex(arg0); ok {
-                if len(argBytes) <= 32 {
-                    log.NewLog("in decimal", new(big.Int).SetBytes(argBytes))
-                }
                 // special case, first byte is `backspace`
                 if len(argBytes) > 0 && argBytes[0] == 0x08 {
                     argBytes = argBytes[1:]

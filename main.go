@@ -40,11 +40,11 @@ func main() {
                 _ = abiSplitCommand.Action(c)
             }
             // output its value in decimal and try to display its readable string
+            _ = hexIntCommand.Action(c)
             _ = hexStrCommand.Action(c)
         } else {
             // input is not hex
             // check if input is in decimal
-
             if num, ok := new(big.Int).SetString(arg0, 10); ok {
                 if num.Cmp(big.NewInt(256)) <= 0 {
                     _ = hexMaxCommand.Action(c)
