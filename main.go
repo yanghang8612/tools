@@ -69,7 +69,7 @@ func main() {
                     return nil
                 }
                 // try to eval arg
-                ee := regexp.MustCompile(`1e\d+`)
+                ee := regexp.MustCompile(`10*e\d+`)
                 for _, e := range ee.FindAllString(arg0, -1) {
                     bigfloat := new(big.Float)
                     bigfloat.SetString(e)
