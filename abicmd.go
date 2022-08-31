@@ -206,9 +206,12 @@ var (
             if !ok {
                 return errors.New("only accept input in hex")
             }
+            var types string
             if len(data)%32 == 4 {
                 method := net.QueryMethod(data[:4])
                 if len(method) != 0 {
+                    typesRegExp := regexp.MustCompile(`^\w+\((.*)\)$`)
+                    types = typesRegExp.ReplaceAllString(method, "$1")
                     fmt.Printf("[selector]: %x - %s\n", data[:4], method)
                 } else {
                     fmt.Printf("[selector]: %x\n", data[:4])
@@ -218,15 +221,19 @@ var (
             if len(data)%32 != 0 {
                 return errors.New("data must be 32*N")
             }
-            fmt.Println("[each data word]:")
-            format := "0x%02x: %x\n"
-            if len(data) > 8*32 {
-                format = "0x%03x: %x\n"
+            if types != "" {
+                return unpack(types, data)
+            } else {
+                fmt.Println("[each data word]:")
+                format := "0x%02x: %x\n"
+                if len(data) > 8*32 {
+                    format = "0x%03x: %x\n"
+                }
+                for i := 0; i < len(data)/32; i++ {
+                    fmt.Printf(format, i*32, data[i*32:i*32+32])
+                }
+                return nil
             }
-            for i := 0; i < len(data)/32; i++ {
-                fmt.Printf(format, i*32, data[i*32:i*32+32])
-            }
-            return nil
         },
     }
     abiUnpackCommand = cli.Command{
@@ -241,20 +248,7 @@ var (
             if !ok {
                 return errors.New("only accept data in hex")
             }
-            args := abi.Arguments{}
-            for _, arg := range strings.Split(arg0, ",") {
-                solType, _ := abi.NewType(arg, "", nil)
-                args = append(args, abi.Argument{Type: solType})
-            }
-            if res, err := args.UnpackValues(data); err == nil {
-                fmt.Printf("[unpack result]:\n")
-                for i, r := range res {
-                    printSol(r, &args[i].Type, "arg", i, 1)
-                }
-                return nil
-            } else {
-                return err
-            }
+            return unpack(arg0, data)
         },
     }
     abi4bytesCommand = cli.Command{
@@ -283,6 +277,23 @@ var (
         },
     }
 )
+
+func unpack(types string, data []byte) error {
+    args := abi.Arguments{}
+    for _, arg := range strings.Split(types, ",") {
+        solType, _ := abi.NewType(arg, "", nil)
+        args = append(args, abi.Argument{Type: solType})
+    }
+    if res, err := args.UnpackValues(data); err == nil {
+        fmt.Printf("[unpack result]:\n")
+        for i, r := range res {
+            printSol(r, &args[i].Type, "arg", i, 1)
+        }
+        return nil
+    } else {
+        return err
+    }
+}
 
 func pack(t abi.Type, v string) (interface{}, error) {
     switch t.T {

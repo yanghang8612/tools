@@ -39,8 +39,11 @@ func main() {
                 // > 32 bytes, can be call data
                 _ = abiSplitCommand.Action(c)
             }
-            // output its value in decimal and try to display its readable string
-            _ = hexIntCommand.Action(c)
+            // if 32bytes, output its value in decimal
+            if len(data) <= 32 {
+                _ = hexIntCommand.Action(c)
+            }
+            // try to display its readable string
             _ = hexStrCommand.Action(c)
         } else {
             // input is not hex
