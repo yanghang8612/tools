@@ -535,7 +535,7 @@ $ tt now "10:36:35"
 #### Examples
 
 ```shell
-$ tt call TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+$ tt call main TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
  1. MAX_UINT()
  2. _totalSupply()
  3. addBlackList(address)
@@ -569,31 +569,49 @@ $ tt call TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
 31. transferOwnership(address)
 32. unpause()
 33. upgradedAddress()
+
 Which method you want to call: 28
 You choose method: [totalSupply() view returns(uint256)]
+[Trigger Result]
+  - success
 [Energy Used]
   - 519
 [Return Data]
   - 33130268679280810
+
 Which method you want to call: 29
 You choose method: [transfer(address _to, uint256 _value) returns(bool)]
 Please input arguments:
  - _to: TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9
  - _value: 1000000
 Please input from address (default zero address): TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9
+[Trigger Result]
+  - success
 [Energy Used]
   - 14650
 [Return Data]
   - false
 [Logs]
 {
-    address: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t,
-    data: 0x00000000000000000000000000000000000000000000000000000000000f4240,
-    topics: [
-        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
-        0x00000000000000000000000082dd6b9966724ae2fdc79b416c7588da67ff1b35,
-        0x00000000000000000000000082dd6b9966724ae2fdc79b416c7588da67ff1b35,
-    ]
+	address: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t,
+	data: 0x00000000000000000000000000000000000000000000000000000000000f4240,
+	topics: [
+		0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
+		0x00000000000000000000000082dd6b9966724ae2fdc79b416c7588da67ff1b35,
+		0x00000000000000000000000082dd6b9966724ae2fdc79b416c7588da67ff1b35,
+	]
 },
+
+Which method you want to call: 29
+You choose method: [transfer(address _to, uint256 _value) returns(bool)]
+Please input arguments:
+ - _to: TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9
+ - _value: 1000000
+Please input from address (default zero address):
+[Trigger Result]
+  - REVERT opcode executed
+[Energy Used]
+  - 1984
+
 Which method you want to call: ^C
 ```
