@@ -266,8 +266,8 @@ var (
             }
             signature := c.Args().Get(0)
             // drop name for all params
-            nameRegExp := regexp.MustCompile(`\s\w+([,)])`)
-            signature = nameRegExp.ReplaceAllString(signature, "$1")
+            nameRegExp := regexp.MustCompile(`([(,])\s*(\w+)\s\w+([,)])`)
+            signature = nameRegExp.ReplaceAllString(signature, "$1$2$3")
             // expand all int|uint to int256|uint256
             abbIntRegExp := regexp.MustCompile(`int([,)\s\[])`)
             signature = abbIntRegExp.ReplaceAllString(signature, "int256$1")
