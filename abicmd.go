@@ -85,7 +85,7 @@ var (
 
                 // next ask user to input the method index he wants to call
                 for {
-                    fmt.Print("Which method you want to call: ")
+                    fmt.Print("\nWhich method you want to call: ")
                     var index string
                     fmt.Scanln(&index)
                     i, err := strconv.Atoi(index)
@@ -122,6 +122,12 @@ var (
                             from = "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb"
                         }
                         res := net.Trigger(domain, contractAddr, from, method.Sig, hexutils.BytesToHex(calldata))
+                        // print trigger result (default success)
+                        if len(res.Result.Message) == 0 {
+                            fmt.Println("[Trigger Result]\n  - " + "success")
+                        } else {
+                            fmt.Println("[Trigger Result]\n  - " + res.Result.Message)
+                        }
                         // print energy used
                         fmt.Println("[Energy Used]\n  - " + strconv.Itoa(int(res.EnergyUsed)))
                         // print constant result
