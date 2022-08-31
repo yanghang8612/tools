@@ -23,7 +23,7 @@ ln -s /usr/local/bin/tools /bin/tt
 
 ### How to install `go`
 
-Can't you fucking Google or Baidu?
+You can't fucking Google or Baidu?
 
 ## Commands Usage
 
