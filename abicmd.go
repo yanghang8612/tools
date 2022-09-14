@@ -98,9 +98,9 @@ var (
                     args := make([]interface{}, 0)
                     if len(method.Inputs) > 0 {
                         fmt.Println("Please input arguments:")
-                        for i, inputType := range method.Inputs {
+                        for _, inputType := range method.Inputs {
                             if len(inputType.Name) == 0 {
-                                fmt.Printf(" - %d: ", i)
+                                fmt.Printf(" - %s: ", inputType.Type)
                             } else {
                                 fmt.Printf(" - %s: ", inputType.Name)
                             }

@@ -431,8 +431,6 @@ USAGE:
 COMMANDS:
    txs       Query txs in the given net for the given account
    tx        Query the tx in the given net for the given tx hash
-   speed     Query pool speed for given token
-   transfer  Query all transfer records for given pool
 
 OPTIONS:
    --help, -h  show help (default: false)
