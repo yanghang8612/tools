@@ -371,12 +371,33 @@ func printSol(param interface{}, paramTy *abi.Type, name string, index, offset i
         fmt.Printf("[%s-%02d]: %s, %v - %s\n", name, index, paramTy.String(), param, base58.CheckEncode(param.(common.Address).Bytes(), 0x41))
     case abi.IntTy, abi.UintTy:
         fmt.Printf("[%s-%02d]: %s, %v", name, index, paramTy.String(), param)
-        intWithDot := formatBigInt(param.(*big.Int))
+        var paramBigInt *big.Int
+        switch param.(type) {
+        case int8:
+            paramBigInt = big.NewInt(int64(param.(int8)))
+        case int16:
+            paramBigInt = big.NewInt(int64(param.(int16)))
+        case int32:
+            paramBigInt = big.NewInt(int64(param.(int32)))
+        case int64:
+            paramBigInt = big.NewInt(param.(int64))
+        case uint8:
+            paramBigInt = big.NewInt(0).SetUint64(uint64(param.(uint8)))
+        case uint16:
+            paramBigInt = big.NewInt(0).SetUint64(uint64(param.(uint16)))
+        case uint32:
+            paramBigInt = big.NewInt(0).SetUint64(uint64(param.(uint32)))
+        case uint64:
+            paramBigInt = big.NewInt(0).SetUint64(param.(uint64))
+        case *big.Int:
+            paramBigInt = param.(*big.Int)
+        }
+        intWithDot := formatBigInt(paramBigInt)
         if strings.ContainsAny(intWithDot, ",") {
             fmt.Printf(" - %s", intWithDot)
         }
-        if len(param.(*big.Int).String()) >= 6 {
-            fmt.Printf(" (%d)", len(param.(*big.Int).String()))
+        if len(paramBigInt.String()) >= 6 {
+            fmt.Printf(" (%d)", len(paramBigInt.String()))
         }
         fmt.Println()
     default:
