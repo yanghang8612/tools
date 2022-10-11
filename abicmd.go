@@ -265,19 +265,24 @@ var (
                 return errors.New("4bytes subcommand needs func or event signature arg")
             }
             signature := c.Args().Get(0)
+            // drop semicolon
+            signature = strings.ReplaceAll(signature, ";", "")
+            // drop indexed keywords
+            signature = strings.ReplaceAll(signature, "indexed", "")
             // drop name for all params
-            nameRegExp := regexp.MustCompile(`([(,])\s*(\w+)\s\w+([,)])`)
-            signature = nameRegExp.ReplaceAllString(signature, "$1$2$3")
+            nameRegExp := regexp.MustCompile(`\s*(\w+)\s+\w+\s*([,)])`)
+            signature = nameRegExp.ReplaceAllString(signature, "$1$2")
             // expand all int|uint to int256|uint256
             abbIntRegExp := regexp.MustCompile(`int([,)\s\[])`)
             signature = abbIntRegExp.ReplaceAllString(signature, "int256$1")
             // drop all whitespaces
             signature = strings.ReplaceAll(signature, " ", "")
             log.NewLog("abi valid", signature)
-            selector := crypto.Keccak256([]byte(signature))[:4]
-            log.NewLog("origin hex", selector)
-            res := make([]byte, 32-len(selector))
-            selector = append(selector, res...)
+            selector := crypto.Keccak256([]byte(signature))
+            log.NewLog("event hex", selector)
+            log.NewLog("func hex", selector[:4])
+            res := make([]byte, 32-len(selector[:4]))
+            selector = append(selector[:4], res...)
             log.NewLog("padded hex", selector)
             return nil
         },

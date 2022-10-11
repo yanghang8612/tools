@@ -64,7 +64,7 @@ func main() {
                     _ = nowCommand.Action(c)
                 }
                 // check if arg is function or event
-                if matched, _ := regexp.MatchString(`^\w.*\(.*\)$`, arg0); matched {
+                if matched, _ := regexp.MatchString(`^\w.*\(.*\);*$`, arg0); matched {
                     _ = abi4bytesCommand.Action(c)
                     return nil
                 }
