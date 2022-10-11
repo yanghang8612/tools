@@ -89,7 +89,7 @@ var (
                     var index string
                     fmt.Scanln(&index)
                     i, err := strconv.Atoi(index)
-                    if i <= 0 || i >= len(methods) || err != nil {
+                    if i <= 0 || i > len(methods) || err != nil {
                         fmt.Println("Input index error, try again.")
                         continue
                     }
