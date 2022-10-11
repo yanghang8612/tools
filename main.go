@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-
     app := cli.NewApp()
     app.Name = filepath.Base(os.Args[0])
     app.HideHelp = true
