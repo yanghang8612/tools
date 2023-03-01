@@ -33,7 +33,6 @@ type Contract struct {
 
 var (
     callCommand = cli.Command{
-
         Name:  "call",
         Usage: "Interact with contract on TRON network (main or nile)",
         Action: func(c *cli.Context) error {
