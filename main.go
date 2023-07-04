@@ -20,7 +20,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.HideHelp = true
-	app.Copyright = "Copyright 2021-2022 Asuka, jeancky"
+	app.Copyright = "Copyright 2021-2023 Asuka, jeancky"
 	app.Usage = "very useful tool kits for TRON and ethereum"
 	app.CustomAppHelpTemplate = ""
 	app.Action = func(c *cli.Context) error {

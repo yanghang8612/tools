@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
@@ -15,6 +17,10 @@ const (
 	Endpoint    = "https://%s.trongrid.io/"
 	TriggerPath = "wallet/triggerconstantcontract"
 )
+
+var appClient = &http.Client{
+	Timeout: 3 * time.Second,
+}
 
 type TriggerRequest struct {
 	OwnerAddress     string `json:"owner_address"`
@@ -98,11 +104,16 @@ func QueryMethod(selector []byte) string {
 			return rsp.Results[rsp.Count-1].Signature
 		}
 	}
+
+	data = Get(fmt.Sprintf("https://raw.githubusercontent.com/ethereum-lists/4bytes/master/signatures/%x", selector[:4]))
+	if !strings.Contains(string(data), "404") {
+		return string(data)
+	}
 	return ""
 }
 
 func Get(url string) []byte {
-	resp, err := http.Get(url)
+	resp, err := appClient.Get(url)
 	if err == nil && resp.StatusCode == 200 {
 		defer resp.Body.Close()
 		if body, err := io.ReadAll(resp.Body); err == nil {
@@ -122,7 +133,7 @@ func HighGet(url string, res interface{}) error {
 }
 
 func Post(url string, data []byte) []byte {
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	resp, err := appClient.Post(url, "application/json", bytes.NewBuffer(data))
 	if err == nil && resp.StatusCode == 200 {
 		defer resp.Body.Close()
 		if body, err := io.ReadAll(resp.Body); err == nil {
