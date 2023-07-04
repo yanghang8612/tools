@@ -19,7 +19,7 @@ const (
 )
 
 var appClient = &http.Client{
-	Timeout: 3 * time.Second,
+	Timeout: 6 * time.Second,
 }
 
 type TriggerRequest struct {
@@ -94,21 +94,33 @@ type Rsp4Bytes struct {
 	}
 }
 
-func QueryMethod(selector []byte) string {
-	var data []byte
-	data = Get(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/?hex_signature=%x", selector))
-	var rsp Rsp4Bytes
-	err := json.Unmarshal(data, &rsp)
-	if err == nil {
-		if rsp.Count != 0 {
-			return rsp.Results[rsp.Count-1].Signature
-		}
-	}
+type RspEtherFace struct {
+	Items []struct {
+		Text string `json:"text"`
+	} `json:"items"`
+}
 
-	data = Get(fmt.Sprintf("https://raw.githubusercontent.com/ethereum-lists/4bytes/master/signatures/%x", selector[:4]))
+func QueryMethod(selector []byte) string {
+	// query from 4bytes GitHub repo
+	data := Get(fmt.Sprintf("https://raw.githubusercontent.com/ethereum-lists/4bytes/master/signatures/%x", selector[:4]))
 	if !strings.Contains(string(data), "404") {
 		return string(data)
 	}
+
+	// query from etherface.io
+	var rspEtherFace RspEtherFace
+	if HighGet(fmt.Sprintf("https://api.etherface.io/v1/signatures/hash/all/%x/1", selector), &rspEtherFace) == nil {
+		return rspEtherFace.Items[0].Text
+	}
+
+	// query from 4bytes.directory
+	var rsp4Bytes Rsp4Bytes
+	if HighGet(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/?hex_signature=%x", selector), &rsp4Bytes) == nil {
+		if rsp4Bytes.Count != 0 {
+			return rsp4Bytes.Results[rsp4Bytes.Count-1].Signature
+		}
+	}
+
 	return ""
 }
 
