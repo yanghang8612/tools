@@ -87,6 +87,23 @@ func Trigger(net, addr, from, selector, params string) *TriggerResponse {
 	return nil
 }
 
+type RspEtherFace struct {
+	Items []struct {
+		Text string `json:"text"`
+	} `json:"items"`
+}
+
+type RspOpenChainItem struct {
+	Name     string `json:"name"`
+	Filtered bool   `json:"filtered"`
+}
+
+type RspOpenChain struct {
+	Result struct {
+		Function map[string][]RspOpenChainItem `json:"function"`
+	} `json:"result"`
+}
+
 type Rsp4Bytes struct {
 	Count   uint
 	Results []struct {
@@ -94,17 +111,19 @@ type Rsp4Bytes struct {
 	}
 }
 
-type RspEtherFace struct {
-	Items []struct {
-		Text string `json:"text"`
-	} `json:"items"`
-}
-
 func QueryMethod(selector []byte) string {
 	// query from 4bytes GitHub repo
 	data := Get(fmt.Sprintf("https://raw.githubusercontent.com/ethereum-lists/4bytes/master/signatures/%x", selector[:4]))
 	if !strings.Contains(string(data), "404") {
 		return string(data)
+	}
+
+	// query from openchain.xyz
+	var rspOpenChain RspOpenChain
+	if HighGet(fmt.Sprintf("https://api.openchain.xyz/signature-database/v1/lookup?function=0x%x&filter=true", selector[:4]), &rspOpenChain) == nil {
+		if rspOpenChain.Result.Function != nil {
+			return rspOpenChain.Result.Function[fmt.Sprintf("0x%x", selector[:4])][0].Name
+		}
 	}
 
 	// query from etherface.io
