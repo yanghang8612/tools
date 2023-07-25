@@ -24,7 +24,7 @@ func FlushLogsToConsole() {
 	for _, log := range pendingLogs {
 		title := "[" + log.title + "]"
 		switch log.content.(type) {
-		case []byte:
+		case []byte, [32]byte:
 			fmt.Printf(titleFormat+"0x%x\n", title, log.content)
 		case string:
 			fmt.Printf(titleFormat+"%s\n", title, log.content)

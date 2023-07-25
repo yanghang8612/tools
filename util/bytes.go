@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func Has0xPrefix(s string) bool {
@@ -13,9 +13,17 @@ func Has0xPrefix(s string) bool {
 }
 
 func FromHex(s string) ([]byte, bool) {
-	if Has0xPrefix(s) {
-		return common.FromHex(s), true
+	// append 0x prefix if not exist
+	if !Has0xPrefix(s) {
+		s = "0x" + s
 	}
+
+	// try to decode hex
+	if data, err := hexutil.Decode(s); err == nil {
+		return data, true
+	}
+
+	// otherwise, it may be string
 	return nil, false
 }
 
