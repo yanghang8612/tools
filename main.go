@@ -90,6 +90,7 @@ func main() {
 	}
 	app.Commands = []*cli.Command{
 		&callCommand,
+		&hashCommand,
 		&nowCommand,
 		{
 			Name:  "abi",
