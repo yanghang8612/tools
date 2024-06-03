@@ -13,17 +13,12 @@ func Has0xPrefix(s string) bool {
 }
 
 func FromHex(s string) ([]byte, bool) {
-	// append 0x prefix if not exist
-	if !Has0xPrefix(s) {
-		s = "0x" + s
-	}
-
 	// try to decode hex
 	if data, err := hexutil.Decode(s); err == nil {
 		return data, true
 	}
 
-	// otherwise, it may be string
+	// otherwise, it may be string or invalid hex
 	return nil, false
 }
 

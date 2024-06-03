@@ -138,6 +138,13 @@ func main() {
 				&txCommand,
 			},
 		},
+		{
+			Name:  "tx",
+			Usage: "Transaction related commands",
+			Subcommands: []*cli.Command{
+				&recoverCommand,
+			},
+		},
 	}
 	app.After = func(c *cli.Context) error {
 		log.FlushLogsToConsole()
