@@ -1,6 +1,6 @@
 package utils
 
-import "github.com/btcsuite/btcutil/base58"
+import "github.com/btcsuite/btcd/btcutil/base58"
 
 func ToAddress(s string) ([]byte, bool) {
 	if len(s) == 34 && s[0] == 'T' {
