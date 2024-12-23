@@ -133,17 +133,16 @@ var (
 						// print constant result
 						if len(res.ConstantResult) > 0 && len(res.ConstantResult[0]) > 0 {
 							fmt.Println("[Return Data]")
-							results := make(map[string]interface{})
-							err = method.Outputs.UnpackIntoMap(results, common.FromHex(res.ConstantResult[0]))
+							unpackResults, err := method.Outputs.Unpack(common.FromHex(res.ConstantResult[0]))
 							if err != nil {
 								fmt.Println(err.Error())
 							} else {
-								for k, v := range results {
-									if len(k) == 0 {
-										fmt.Printf("  - %v\n", v)
-									} else {
-										fmt.Printf("  - %s: %v\n", k, v)
+								for i, result := range unpackResults {
+									name := method.Outputs[i].Name
+									if len(name) == 0 {
+										name = "result"
 									}
+									printSol(result, &method.Outputs[i].Type, name, i, 1)
 								}
 							}
 						}
