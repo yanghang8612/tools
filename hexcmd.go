@@ -1,20 +1,62 @@
 package main
 
 import (
-	"tools/log"
-	"tools/util"
-
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
+	"tools/log"
+	"tools/util"
+
 	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/urfave/cli/v2"
 )
+
+// 0xd0 range - eof operations.
+const (
+	CALLTOKEN              vm.OpCode = 0xd0
+	TOKENBALANCE           vm.OpCode = 0xd1
+	CALLTOKENVALUE         vm.OpCode = 0xd2
+	CALLTOKENID            vm.OpCode = 0xd3
+	ISCONTRACT             vm.OpCode = 0xd4
+	FREEZE                 vm.OpCode = 0xd5
+	UNFREEZE               vm.OpCode = 0xd6
+	FREEZEEXPIRETIME       vm.OpCode = 0xd7
+	VOTEWITNESS            vm.OpCode = 0xd8
+	WITHDRAWREWARD         vm.OpCode = 0xd9
+	FREEZEBALANCEV2        vm.OpCode = 0xda
+	UNFREEZEBALANCEV2      vm.OpCode = 0xdb
+	CANCELALLUNFREEZEV2    vm.OpCode = 0xdc
+	WITHDRAWEXPIREUNFREEZE vm.OpCode = 0xdd
+	DELEGATERESOURCE       vm.OpCode = 0xde
+	UNDELEGATERESOURCE     vm.OpCode = 0xdf
+)
+
+var tronOpCodeToString = [256]string{
+	CALLTOKEN:              "CALLTOKEN",
+	TOKENBALANCE:           "TOKENBALANCE",
+	CALLTOKENVALUE:         "CALLTOKENVALUE",
+	CALLTOKENID:            "CALLTOKENID",
+	ISCONTRACT:             "ISCONTRACT",
+	FREEZE:                 "FREEZE",
+	UNFREEZE:               "UNFREEZE",
+	FREEZEEXPIRETIME:       "FREEZEEXPIRETIME",
+	VOTEWITNESS:            "VOTEWITNESS",
+	WITHDRAWREWARD:         "WITHDRAWREWARD",
+	FREEZEBALANCEV2:        "FREEZEBALANCEV2",
+	UNFREEZEBALANCEV2:      "UNFREEZEBALANCEV2",
+	CANCELALLUNFREEZEV2:    "CANCELALLUNFREEZEV2",
+	WITHDRAWEXPIREUNFREEZE: "WITHDRAWEXPIREUNFREEZE",
+	DELEGATERESOURCE:       "DELEGATERESOURCE",
+	UNDELEGATERESOURCE:     "UNDELEGATERESOURCE",
+}
 
 var (
 	hexAddrCommand = cli.Command{
@@ -46,8 +88,7 @@ var (
 			} else {
 				return errors.New("input is not recognized, please append 0x prefix if in hex")
 			}
-			log.NewLog("eth addr", addr.String())
-			log.NewLog("tron addr", base58.CheckEncode(addr.Bytes(), 0x41))
+			log.NewLog("addr", fmt.Sprintf("%s (%s)", base58.CheckEncode(addr.Bytes(), 0x41), addr.String()))
 			return nil
 		},
 	}
@@ -100,12 +141,17 @@ var (
 	}
 	hexStrCommand = cli.Command{
 		Name:  "str",
-		Usage: "convert str between ascii and hex",
+		Usage: "Convert str between ascii and hex",
 		Action: func(c *cli.Context) error {
 			if c.NArg() != 1 {
 				return errors.New("hex command only needs single arg")
 			}
 			arg0 := c.Args().Get(0)
+
+			if len(arg0) > 1024 {
+				return errors.New("input string is too long, max length is 1024 characters")
+			}
+
 			// check if input is in hex
 			if argBytes, ok := utils.FromHex(arg0); ok {
 				// special case, first byte is `backspace`
@@ -116,6 +162,64 @@ var (
 			} else {
 				// otherwise treat input as str
 				log.NewLog("in hex", []byte(arg0))
+			}
+			return nil
+		},
+	}
+	hexCodeCommand = cli.Command{
+		Name:  "code",
+		Usage: "Convert hex to bytecode",
+		Action: func(c *cli.Context) error {
+			if c.NArg() != 1 {
+				return errors.New("code command only needs single arg")
+			}
+			arg0 := c.Args().Get(0)
+
+			// check if input is in hex
+			if argBytes, ok := utils.FromHex(arg0); ok {
+				var sb strings.Builder
+				for i := 0; i < len(argBytes); i++ {
+					opCode := vm.OpCode(argBytes[i])
+					if opCode >= CALLTOKEN && opCode <= UNDELEGATERESOURCE {
+						sb.WriteString(fmt.Sprintf("[%d] %s\n", i, tronOpCodeToString[opCode]))
+					} else if opCode.IsPush() {
+						dataLen := opCode - vm.PUSH0
+						data := hex.EncodeToString(argBytes[i+1 : i+1+int(dataLen)])
+						sb.WriteString(fmt.Sprintf("[%d] %s 0x%s\n", i, opCode.String(), data))
+						i += int(dataLen) // skip the data bytes
+					} else {
+						sb.WriteString(fmt.Sprintf("[%d] %s\n", i, opCode.String()))
+					}
+				}
+				log.NewLog("bytecode\n", sb.String())
+			} else {
+				return errors.New("input is not in hex format")
+			}
+			return nil
+		},
+	}
+	hexKeyCommand = cli.Command{
+		Name:  "key",
+		Usage: "Calculate the address corresponding to the private key",
+		Action: func(c *cli.Context) error {
+			if c.NArg() != 1 {
+				return errors.New("key command only needs single arg")
+			}
+			arg0 := c.Args().Get(0)
+
+			// check if input is in hex
+			if argBytes, ok := utils.FromHex(arg0); ok {
+				if len(argBytes) != 32 {
+					return errors.New("input should be 32 bytes hex string")
+				}
+				privateKey, err := crypto.ToECDSA(argBytes)
+				if err != nil {
+					return fmt.Errorf("invalid private key: %v", err)
+				}
+				addr := crypto.PubkeyToAddress(privateKey.PublicKey)
+				log.NewLog("key addr", fmt.Sprintf("%s (%s)", base58.CheckEncode(addr.Bytes(), 0x41), addr.String()))
+			} else {
+				return errors.New("input is not in hex format")
 			}
 			return nil
 		},

@@ -20,7 +20,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = filepath.Base(os.Args[0])
 	app.HideHelp = true
-	app.Copyright = "Copyright 2021-2023 Asuka, jeancky"
+	app.Copyright = "Copyright 2021-2025 Asuka, jeancky"
 	app.Usage = "very useful tool kits for TRON and ethereum"
 	app.CustomAppHelpTemplate = ""
 	app.Action = func(c *cli.Context) error {
@@ -39,10 +39,14 @@ func main() {
 				// > 32 bytes, can be call data
 				_ = abiSplitCommand.Action(c)
 			}
-			// if 32bytes, output its value in decimal
+			// if <= 32bytes, output its value in decimal
 			if len(data) <= 32 {
 				_ = nowCommand.Action(c)
 				_ = hexIntCommand.Action(c)
+			}
+			//  if == 32bytes, output its key address
+			if len(data) == 32 {
+				_ = hexKeyCommand.Action(c)
 			}
 			// try to display its readable string
 			_ = hexStrCommand.Action(c)
@@ -128,6 +132,8 @@ func main() {
 				&hexIntCommand,
 				&hexMaxCommand,
 				&hexStrCommand,
+				&hexCodeCommand,
+				&hexKeyCommand,
 			},
 		},
 		{
@@ -142,6 +148,7 @@ func main() {
 			Name:  "tx",
 			Usage: "Transaction related commands",
 			Subcommands: []*cli.Command{
+				&signCommand,
 				&recoverCommand,
 			},
 		},
