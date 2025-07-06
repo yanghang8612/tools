@@ -26,11 +26,11 @@ var (
 			if c.NArg() < 2 {
 				return errors.New("txs subcommand needs net and addr args")
 			}
-			var domain string
+			var scanDomain string
 			if strings.Compare("main", c.Args().Get(0)) == 0 {
-				domain = "apilist"
+				scanDomain = "apilist"
 			} else if strings.Compare("nile", c.Args().Get(0)) == 0 {
-				domain = "nileapi"
+				scanDomain = "nileapi"
 			} else {
 				return errors.New("error net argument")
 			}
@@ -46,13 +46,13 @@ var (
 			}
 			fmt.Println("[Legend]: ✅ - [Success] ⚠️  - [Revert] ⏱  - [Out_Of_Time] ⚡️ - [Out_Of_Energy] 💢 - [Other]")
 			for i := 0; i < total; i += 50 {
-				data := net.Get("https://" + domain +
-					".tronscan.org/api/contracts/transaction?" +
+				data := net.Get("https://" + scanDomain +
+					".tronscan.org/api/transaction?" +
 					"sort=-timestamp&" +
 					"count=true&" +
 					"limit=50" +
 					"&start=" + strconv.Itoa(start+i) +
-					"&contract=" + addr)
+					"&address=" + addr)
 
 				if data != nil {
 					var txs Txs
@@ -68,7 +68,7 @@ var (
 						fmt.Printf("%"+strconv.Itoa(len(strconv.Itoa(total)))+"d %s %s %s ",
 							i+j+1,
 							time.Unix(tx.Timestamp/1000, 0).Format("2006-01-02 15:04:05"),
-							tx.TxHash,
+							tx.Hash,
 							tx.OwnerAddress)
 						switch tx.ContractRet {
 						case "SUCCESS":
@@ -82,17 +82,17 @@ var (
 						default:
 							fmt.Printf("💢 ")
 						}
-						if len(tx.CallData) >= 8 {
-							if _, ok := cache[tx.CallData[:8]]; !ok {
-								selector, _ := hex.DecodeString(tx.CallData[:8])
+						if len(tx.TriggerInfo.Data) >= 8 {
+							if _, ok := cache[tx.TriggerInfo.Data[:8]]; !ok {
+								selector, _ := hex.DecodeString(tx.TriggerInfo.Data[:8])
 								method := net.QueryMethod(selector)
 								if len(method) != 0 {
-									cache[tx.CallData[:8]] = method
+									cache[tx.TriggerInfo.Data[:8]] = method
 								} else {
-									cache[tx.CallData[:8]] = fmt.Sprintf("%x", selector)
+									cache[tx.TriggerInfo.Data[:8]] = fmt.Sprintf("%x", selector)
 								}
 							}
-							fmt.Print(cache[tx.CallData[:8]])
+							fmt.Print(cache[tx.TriggerInfo.Data[:8]])
 						}
 						fmt.Println()
 					}
@@ -209,14 +209,14 @@ type Txs struct {
 }
 
 type Tx struct {
-	OwnerAddress string
-	ToAddress    string
-	CallData     string `json:"call_data"`
-	TxHash       string
-	Timestamp    int64
-	ContractRet  string
+	OwnerAddress string `json:"ownerAddress"`
+	ToAddress    string `json:"toAddress"`
+	Hash         string `json:"hash"`
+	Timestamp    int64  `json:"timestamp"`
+	ContractRet  string `json:"contractRet"`
 	TriggerInfo  struct {
-		MethodName string
+		Data       string `json:"data"`
+		MethodName string `json:"methodName"`
 	} `json:"trigger_info"`
 }
 
