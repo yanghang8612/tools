@@ -8,10 +8,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
 	"tools/log"
 	"tools/util"
+
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
@@ -109,7 +110,7 @@ var (
 			}
 			if ok {
 				log.NewLog("in hex", bigint.Bytes())
-				log.NewLog("in dec", fmt.Sprintf("%s (%d)", formatBigInt(bigint), len(bigint.String())))
+				log.NewLog("in dec", fmt.Sprintf("%s (%s len:%d)", bigint.String(), formatBigInt(bigint), len(bigint.String())))
 				return nil
 			} else {
 				return errors.New("only accept input in dec or hex")
@@ -148,9 +149,9 @@ var (
 			}
 			arg0 := c.Args().Get(0)
 
-			if len(arg0) > 1024 {
-				return errors.New("input string is too long, max length is 1024 characters")
-			}
+			// if len(arg0) > 1024 {
+			// 	return errors.New("input string is too long, max length is 1024 characters")
+			// }
 
 			// check if input is in hex
 			if argBytes, ok := utils.FromHex(arg0); ok {
@@ -181,17 +182,23 @@ var (
 				for i := 0; i < len(argBytes); i++ {
 					opCode := vm.OpCode(argBytes[i])
 					if opCode >= CALLTOKEN && opCode <= UNDELEGATERESOURCE {
-						sb.WriteString(fmt.Sprintf("[%d] %s\n", i, tronOpCodeToString[opCode]))
+						sb.WriteString(fmt.Sprintf("[%d] 0x%02x %s\n", i, argBytes[i], tronOpCodeToString[opCode]))
 					} else if opCode.IsPush() {
 						dataLen := opCode - vm.PUSH0
+						if i+1+int(dataLen) > len(argBytes) {
+							break
+						}
 						data := hex.EncodeToString(argBytes[i+1 : i+1+int(dataLen)])
-						sb.WriteString(fmt.Sprintf("[%d] %s 0x%s\n", i, opCode.String(), data))
+						sb.WriteString(fmt.Sprintf("[%d] 0x%02x %s 0x%s\n", i, argBytes[i], opCode.String(), data))
 						i += int(dataLen) // skip the data bytes
 					} else {
-						sb.WriteString(fmt.Sprintf("[%d] %s\n", i, opCode.String()))
+						if strings.Contains(opCode.String(), "not defined") {
+							break
+						}
+						sb.WriteString(fmt.Sprintf("[%d] 0x%02x %s\n", i, argBytes[i], opCode.String()))
 					}
 				}
-				log.NewLog("bytecode\n", sb.String())
+				log.NewLog("bytecode", "\n"+sb.String())
 			} else {
 				return errors.New("input is not in hex format")
 			}
