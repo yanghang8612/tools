@@ -102,6 +102,7 @@ func main() {
 			Subcommands: []*cli.Command{
 				&abiPadCommand,
 				&abiSplitCommand,
+				&abiPackCommand,
 				&abiUnpackCommand,
 				&abi4bytesCommand,
 			},

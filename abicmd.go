@@ -88,6 +88,10 @@ var (
 					fmt.Print("\nWhich method you want to call: ")
 					var index string
 					fmt.Scanln(&index)
+					index = strings.ToLower(index)
+					if index == "q" || index == "quit" || index == "exit" {
+						break
+					}
 					i, err := strconv.Atoi(index)
 					if i <= 0 || i > len(methods) || err != nil {
 						fmt.Println("Input index error, try again.")
@@ -241,6 +245,23 @@ var (
 			}
 		},
 	}
+	abiPackCommand = cli.Command{
+		Name:  "pack",
+		Usage: "Pack data with function and parameters",
+		Action: func(c *cli.Context) error {
+			if c.NArg() < 1 {
+				return errors.New("pack subcommand requires at least one function argument")
+			}
+			arg0, arg1 := c.Args().Get(0), c.Args().Tail()
+			data, err := utils.EncodeCallData(arg0, arg1)
+			if err != nil {
+				return err
+			}
+
+			log.NewLog("calldata", data)
+			return nil
+		},
+	}
 	abiUnpackCommand = cli.Command{
 		Name:  "unpack",
 		Usage: "Unpack data with given types",
@@ -280,9 +301,6 @@ var (
 			selector := crypto.Keccak256([]byte(signature))
 			log.NewLog("event hex", selector)
 			log.NewLog("func hex", selector[:4])
-			res := make([]byte, 32-len(selector[:4]))
-			selector = append(selector[:4], res...)
-			log.NewLog("padded hex", selector)
 			return nil
 		},
 	}
