@@ -33,28 +33,27 @@ If you just append one arg to the command without subcommands, the program will 
 
 ```shell
 $ tt 0x000000000000000000000000000000000000dEaD
-     [eth addr] - 0x000000000000000000000000000000000000dEaD
-    [tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY
+         [addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY (0x000000000000000000000000000000000000dEaD)
 [32bytes in BE] - 0x000000000000000000000000000000000000000000000000000000000000dead
 [32bytes in LE] - 0x000000000000000000000000000000000000dead000000000000000000000000
-   [in decimal] - 57005
+       [in hex] - 0xdead
+       [in dec] - 57005 (57,005 len:5)
      [in ascii] - ޭ
 
 $ tt T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY
- [eth addr] - 0x000000000000000000000000000000000000dEaD
-[tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY
-   [in hex] - 0x5439794431344e6a396a377841423464624765695839683875706643673350426259
+  [addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY (0x000000000000000000000000000000000000dEaD)
+[in hex] - 0x5439794431344e6a396a377841423464624765695839683875706643673350426259
 ```
 
 - arg is in hexadecimal
 
 ```shell
 $ tt 0x200007368616269
-     [eth addr] - 0x0000000000000000000000000200007368616269
-    [tron addr] - T9yD14Nj9j7xAB4dbGguV3DLSwvb8p5tdG
+         [addr] - T9yD14Nj9j7xAB4dbGguV3DLSwvb8p5tdG (0x0000000000000000000000000200007368616269)
 [32bytes in BE] - 0x0000000000000000000000000000000000000000000000000200007368616269
 [32bytes in LE] - 0x0200007368616269000000000000000000000000000000000000000000000000
-   [in decimal] - 144115683748307561
+       [in hex] - 0x0200007368616269
+       [in dec] - 144115683748307561 (144,115,683,748,307,561 len:18)
      [in ascii] - shabi
      
 $ tt 0xa9059cbb000000000000000000000000e607f127507951682391fcc420d0b6f1bd02eb9600000000000000000000000000000000000000000000000000000000160dc080
@@ -62,6 +61,7 @@ $ tt 0xa9059cbb000000000000000000000000e607f127507951682391fcc420d0b6f1bd02eb960
 [unpack result]:
   - [arg-00]: address, 0xE607f127507951682391FcC420D0b6F1BD02Eb96 - TWwVvzy7iPVKs9oi6BdTLwjA6XJNc8h8aC
   - [arg-01]: uint256, 370000000 - 370,000,000 (9)
+[end unpack]
 [in ascii] - 'PyQh# ж
 ```
 
@@ -69,20 +69,18 @@ $ tt 0xa9059cbb000000000000000000000000e607f127507951682391fcc420d0b6f1bd02eb960
 
 ```shell
 $ tt 1659929813
-  [eth addr] - 0x0000000000000000000000000000000062f084d5
- [tron addr] - T9yD14Nj9j7xAB4dbGeiX9hRTdK9jdt5kW
+      [addr] - T9yD14Nj9j7xAB4dbGeiX9hRTdK9jdt5kW (0x0000000000000000000000000000000062f084d5)
     [in sec] - 2022-08-08 11:36:53
     [in hex] - 0x62f084d5
-    [in dec] - 1,659,929,813 (10)
+    [in dec] - 1659929813 (1,659,929,813 len:10)
 [origin hex] - 0x62f084d5
 [padded hex] - 0x0000000000000000000000000000000000000000000000000000000062f084d5
 
 $ tt 1659929813000
-  [eth addr] - 0x000000000000000000000000000001827B86e008
- [tron addr] - T9yD14Nj9j7xAB4dbGeiXEcTq8tGAJhPmx
+      [addr] - T9yD14Nj9j7xAB4dbGeiXEcTq8tGAJhPmx (0x000000000000000000000000000001827B86e008)
   [in milli] - 2022-08-08 11:36:53
     [in hex] - 0x01827b86e008
-    [in dec] - 1,659,929,813,000 (13)
+    [in dec] - 1659929813000 (1,659,929,813,000 len:13)
 [origin hex] - 0x01827b86e008
 [padded hex] - 0x000000000000000000000000000000000000000000000000000001827b86e008
 ```
@@ -91,53 +89,56 @@ $ tt 1659929813000
 
 ```shell
 $ tt 8-8
-     [in sec] - 1659888000
-   [in milli] - 1659888000000
-[in datetime] - 2022-08-08 00:00:00 +0800 CST
+     [in sec] - 1754582400
+   [in milli] - 1754582400000
+[in datetime] - 2025-08-08 00:00:00 +0800 CST
 [eval result] - 0
 
 $ tt 8:8
-     [in sec] - 1661213280
-   [in milli] - 1661213280000
-[in datetime] - 2022-08-23 08:08:00 +0800 CST
+     [in sec] - 1766707680
+   [in milli] - 1766707680000
+[in datetime] - 2025-12-26 08:08:00 +0800 CST
      [in hex] - 0x383a38
 
 $ tt "22-08-08 08:08:08"
-     [in sec] - 1659917288
-   [in milli] - 1659917288000
-[in datetime] - 2022-08-08 08:08:08 +0800 CST
+     [in sec] - 1754611688
+   [in milli] - 1754611688000
+[in datetime] - 2025-08-08 08:08:08 +0800 CST
+     [in hex] - 0x32352d30382d30382030383a30383a3038
 ```
 
 - arg is just num in decimal
 
 ```shell
 $ tt 1
-  [eth addr] - 0x0000000000000000000000000000000000000001
- [tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8unkKLxmGkn
+      [addr] - T9yD14Nj9j7xAB4dbGeiX9h8unkKLxmGkn (0x0000000000000000000000000000000000000001)
    [max hex] - 0x01
    [max dec] - 1
+    [in hex] - 0x01
+    [in dec] - 1 (1 len:1)
 [origin hex] - 0x01
 [padded hex] - 0x0000000000000000000000000000000000000000000000000000000000000001
 
 $ tt 1000
-  [eth addr] - 0x00000000000000000000000000000000000003e8
- [tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8unnG3nvgHP
+      [addr] - T9yD14Nj9j7xAB4dbGeiX9h8unnG3nvgHP (0x00000000000000000000000000000000000003e8)
+    [in hex] - 0x03e8
+    [in dec] - 1000 (1,000 len:4)
 [origin hex] - 0x03e8
 [padded hex] - 0x00000000000000000000000000000000000000000000000000000000000003e8
 
 $ tt 160
-  [eth addr] - 0x00000000000000000000000000000000000000a0
- [tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8unkdKNoCLK
+      [addr] - T9yD14Nj9j7xAB4dbGeiX9h8unkdKNoCLK (0x00000000000000000000000000000000000000a0)
    [max hex] - 0xffffffffffffffffffffffffffffffffffffffff
    [max dec] - 1461501637330902918203684832716283019655932542975
+    [in hex] - 0xa0
+    [in dec] - 160 (160 len:3)
 [origin hex] - 0xa0
 [padded hex] - 0x00000000000000000000000000000000000000000000000000000000000000a0
 
 $ tt 1000000000000000000
-  [eth addr] - 0x0000000000000000000000000de0b6B3a7640000
- [tron addr] - T9yD14Nj9j7xAB4dbGuuWDPmYjeRYhJdYL
+      [addr] - T9yD14Nj9j7xAB4dbGuuWDPmYjeRYhJdYL (0x0000000000000000000000000de0b6B3a7640000)
     [in hex] - 0x0de0b6b3a7640000
-    [in dec] - 1,000,000,000,000,000,000 (19)
+    [in dec] - 1000000000000000000 (1,000,000,000,000,000,000 len:19)
 [origin hex] - 0x0de0b6b3a7640000
 [padded hex] - 0x0000000000000000000000000000000000000000000000000de0b6b3a7640000
 ```
@@ -145,14 +146,14 @@ $ tt 1000000000000000000
 
 ```shell
 $ tt "Transfer(address from, address to, uint amt)"
- [abi valid] - Transfer(address,address,uint256)
-[origin hex] - 0xddf252ad
-[padded hex] - 0xddf252ad00000000000000000000000000000000000000000000000000000000
+[abi valid] - Transfer(address,address,uint256)
+[event hex] - 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+ [func hex] - 0xddf252ad
 
 $ tt "transfer(address to, uint amt)"
- [abi valid] - transfer(address,uint256)
-[origin hex] - 0xa9059cbb
-[padded hex] - 0xa9059cbb0000000000000000000000000000000000000000000000000000000
+[abi valid] - transfer(address,uint256)
+[event hex] - 0xa9059cbb2ab09eb219583f4a59a5d0623ade346d962bcd4e46b11da047c9049b
+ [func hex] - 0xa9059cbb
 ```
 
 - arg can be eval
@@ -191,16 +192,17 @@ NAME:
    tt abi - ABI related commands
 
 USAGE:
-   tt abi command [command options] [arguments...]
+   tt abi [command options]
 
 COMMANDS:
    pad     Pad num(in hex or dec) to 32bytes
    split   Spilt data to each 32bytes
+   pack    Pack data with function and parameters
    unpack  Unpack data with given types
    4bytes  Get 4bytes selector for given method or event
 
 OPTIONS:
-   --help, -h  show help (default: false)
+   --help, -h  show help
 ```
 
 #### Examples
@@ -239,6 +241,18 @@ $ tt abi split 0xa9059cbb000000000000000000000000e607f127507951682391fcc420d0b6f
   - [arg-01]: uint256, 370000000 - 370,000,000 (9)
 ```
 
+- `pack`
+
+```shell
+$ tt abi pack "transfer(address,uint256)" 0x0e5f4552091a69125d5dfcb7b8c2659029395bdf 10000
+[calldata] - 0xa9059cbb000000000000000000000000e3a2cdc25058e5dee0f4b5c1d5c7bfd5dd6836be0000000000000000000000000000000000000000000000000000000000002710
+
+$ tt abi pack "transfer(address[],uint256[])" "0xe3a2CDC25058e5DEe0F4b5C1d5C7BFD5DD6836Be" "10000,10"
+$ tt abi pack "transfer(address[],uint256[])" 0xe3a2CDC25058e5DEe0F4b5C1d5C7BFD5DD6836Be 10000,10
+$ tt abi pack "transfer(address[],uint256[])" "[0xe3a2CDC25058e5DEe0F4b5C1d5C7BFD5DD6836Be]" "[10000,10]"
+[calldata] - 0xffc3a769000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000e3a2cdc25058e5dee0f4b5c1d5c7bfd5dd6836be00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000002710000000000000000000000000000000000000000000000000000000000000000a
+```
+
 - `unpack`
 
 ```shell
@@ -274,13 +288,14 @@ $ tt abi unpack "uint256[],uint256[],uint256[],uint256[]" 0x00000000000000000000
 
 ```shell
 $ tt abi 4bytes 'regUser(address,string)'
-[origin hex] 0x5a7c7895
-[padded hex] 0x5a7c789500000000000000000000000000000000000000000000000000000000
+[abi valid] - regUser(address,string)
+[event hex] - 0x5a7c78954701c467f53ddfb2f3c0aef5d5a1d85bc501b38191beb1532ecf76c0
+ [func hex] - 0x5a7c7895
 
 $ tt abi 4bytes 'transfer(address to,uint amt)'
- [abi valid] - transfer(address,uint256)
-[origin hex] - 0xa9059cbb
-[padded hex] - 0xa9059cbb00000000000000000000000000000000000000000000000000000000
+[abi valid] - transfer(address,uint256)
+[event hex] - 0xa9059cbb2ab09eb219583f4a59a5d0623ade346d962bcd4e46b11da047c9049b
+ [func hex] - 0xa9059cbb
 ```
 
 ### Command `db`
@@ -364,32 +379,29 @@ OPTIONS:
 
 ```shell
 $ tt hex addr 0xdead
- [eth addr] - 0x000000000000000000000000000000000000dEaD
-[tron addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY
+[addr] - T9yD14Nj9j7xAB4dbGeiX9h8upfCg3PBbY (0x000000000000000000000000000000000000dEaD)
 
 $ tt hex addr TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
- [eth addr] - 0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C
-[tron addr] - TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+[addr] - TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t (0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C)
 
 $ tt hex addr 0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C
- [eth addr] - 0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C
-[tron addr] - TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+[addr] - TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t (0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C)
 ```
 
 - `int`
 
 ```shell
 $ tt hex int 1
-[in hex] - 0x1
-[in dec] - 1
+[in hex] - 0x01
+[in dec] - 1 (1 len:1)
 
 $ tt hex int 1000
 [in hex] - 0x03e8
-[in dec] - 1000
+[in dec] - 1000 (1,000 len:4)
 
 $ tt hex int 0x1000
 [in hex] - 0x1000
-[in dec] - 4096
+[in dec] - 4096 (4,096 len:4)
 ```
 
 - `max`
@@ -412,8 +424,7 @@ $ tt hex max 160
 
 ```shell
 $ tt hex str 0x0200007368616269
-[in decimal] - 144115683748307561
-  [in ascii] - shabi
+[in ascii] - shabi
 ```
 
 ### Command `scan`
@@ -484,40 +495,40 @@ $ tt scan tx main 4b1118a8303b23e2ef8ddd9b6b6ce5de2638f18f1d03435e692fc01e3254fd
 
 ```shell
 $ tt now
-     [in sec] - 1659926195
-   [in milli] - 1659926195804
-[in datetime] - 2022-08-08 10:36:35.80475 +0800 CST m=+0.010608918
+     [in sec] - 1766738717
+   [in milli] - 1766738717826
+[in datetime] - 2025-12-26 16:45:17.826892 +0800 CST m=+0.001490251
 
-$ tt now 1659926195
-  [if sec] - 2022-08-08 10:36:35
+$ tt now 1766738717
+[in sec] - 2025-12-26 16:45:17
 
-$ tt now 1659926195804
-[if milli] - 2022-08-08 10:36:35
+$ tt now 1766738717826
+[in milli] - 2025-12-26 16:45:17
 
-$ tt now "2022-08-08 10:36:35"
-     [in sec] - 1659926195
-   [in milli] - 1659926195000
-[in datetime] - 2022-08-08 10:36:35 +0800 CST
+$ tt now "2025-08-08 10:36:35"
+     [in sec] - 1754620595
+   [in milli] - 1754620595000
+[in datetime] - 2025-08-08 10:36:35 +0800 CST
 
-$ tt now "2022-08-08"
-     [in sec] - 1659888000
-   [in milli] - 1659888000000
-[in datetime] - 2022-08-08 00:00:00 +0800 CST
+$ tt now "2025-08-08"
+     [in sec] - 1754582400
+   [in milli] - 1754582400000
+[in datetime] - 2025-08-08 00:00:00 +0800 CST
 
 $ tt now "08-08"
-     [in sec] - 1659888000
-   [in milli] - 1659888000000
-[in datetime] - 2022-08-08 00:00:00 +0800 CST
+     [in sec] - 1754582400
+   [in milli] - 1754582400000
+[in datetime] - 2025-08-08 00:00:00 +0800 CST
 
 $ tt now "08-08 10:36:35"
-     [in sec] - 1659926195
-   [in milli] - 1659926195000
-[in datetime] - 2022-08-08 10:36:35 +0800 CST
+     [in sec] - 1754620595
+   [in milli] - 1754620595000
+[in datetime] - 2025-08-08 10:36:35 +0800 CST
 
 $ tt now "10:36:35"
-     [in sec] - 1659926195
-   [in milli] - 1659926195000
-[in datetime] - 2022-08-08 10:36:35 +0800 CST
+     [in sec] - 1766716595
+   [in milli] - 1766716595000
+[in datetime] - 2025-12-26 10:36:35 +0800 CST
 ```
 
 ### Command `call`
