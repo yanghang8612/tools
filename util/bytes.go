@@ -13,6 +13,10 @@ func Has0xPrefix(s string) bool {
 }
 
 func FromHex(s string) ([]byte, bool) {
+	if Has0xPrefix(s) && len(s)%2 == 1 {
+		s = "0x0" + s[2:]
+	}
+
 	// try to decode hex
 	if data, err := hexutil.Decode(s); err == nil {
 		return data, true
